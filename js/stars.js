@@ -117,21 +117,21 @@ export function drawStars(time) {
     ctx.fillStyle=`rgba(${s.r},${s.g},${s.b},${Math.min(alpha,0.92)})`;
     ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
 
-    // Star name + coordinates — always visible below star
+    // Star name + coordinates — always visible, clear of halo
     if (s.starName) {
-      const la = s.hovered ? 0.90 : 0.50;
+      const la = s.hovered ? 0.92 : 0.52;
       ctx.textAlign = 'center';
 
-      // Name — serif italic
+      // Name — serif italic, starlight white
       ctx.font = `italic 12px 'Cormorant Garamond', Georgia, serif`;
       ctx.textBaseline = 'top';
-      ctx.fillStyle = `rgba(240,210,140,${la})`;
-      ctx.fillText(s.starName, px, py + 12);
+      ctx.fillStyle = `rgba(232,228,248,${la})`;
+      ctx.fillText(s.starName, px, py + 22);   // pushed below halo
 
-      // Coordinates — tiny mono
+      // Coordinates — tiny mono, violet-dim
       ctx.font = `7px 'Space Mono', monospace`;
-      ctx.fillStyle = `rgba(200,184,232,${la * 0.65})`;
-      ctx.fillText(s.starCoords, px, py + 26);
+      ctx.fillStyle = `rgba(180,172,212,${la * 0.70})`;
+      ctx.fillText(s.starCoords, px, py + 36);
     }
   }
 }

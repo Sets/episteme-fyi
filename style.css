@@ -7,14 +7,17 @@
 }
 
 :root {
-  --gold:       #D4A853;
-  --gold-dim:   #9A7A3A;
-  --gold-light: #F0CC88;
-  --violet:     #C8B8E8;
-  --violet-dim: #8878A8;
-  --bg:         #07060A;
-  --mono:       'Space Mono', 'SF Mono', 'Fira Code', monospace;
-  --serif:      'Cormorant Garamond', Georgia, serif;
+  --gold:        #D4A853;   /* kept for accents only */
+  --gold-dim:    #9A7A3A;
+  --gold-light:  #F0CC88;
+  --violet:      #C8B8E8;
+  --violet-dim:  #8878A8;
+  --star:        #E8E4F4;   /* starlight white-violet */
+  --star-dim:    #B0AAC8;   /* dimmer starlight */
+  --star-bright: #F4F2FF;   /* brightest starlight */
+  --bg:          #07060A;
+  --mono:        'Space Mono', 'SF Mono', 'Fira Code', monospace;
+  --serif:       'Cormorant Garamond', Georgia, serif;
 }
 
 html, body {
@@ -69,7 +72,7 @@ html, body {
 #scanline::after {
   content: '';
   position: absolute; left: 0; width: 100%; height: 10px;
-  background: linear-gradient(transparent, rgba(212,168,83,0.008), transparent);
+  background: linear-gradient(transparent, rgba(200,190,240,0.008), transparent);
   animation: scanMove 14s linear infinite;
 }
 
@@ -95,7 +98,7 @@ html, body {
 #boot-text {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--gold);
+  color: var(--star);
   opacity: 0.65;
   line-height: 2.4;
 }
@@ -105,7 +108,7 @@ html, body {
 #boot-cursor {
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--gold);
+  color: var(--star);
   opacity: 0.65;
   animation: cursorBlink 0.9s step-end infinite;
 }
@@ -126,10 +129,10 @@ html, body {
   text-transform: uppercase;
 }
 
-#hud-tl { top: 22px; left: 24px;  color: var(--gold);       opacity: 0.3;  }
+#hud-tl { top: 22px; left: 24px;  color: var(--star-dim);       opacity: 0.3;  }
 #hud-tr { top: 22px; right: 24px; color: var(--violet-dim); opacity: 0.22; text-align: right; }
 #hud-bl { bottom: 22px; left: 24px;  color: var(--violet-dim); opacity: 0.22; }
-#hud-br { bottom: 22px; right: 24px; color: var(--gold);        opacity: 0.25; text-align: right; }
+#hud-br { bottom: 22px; right: 24px; color: var(--star-dim);        opacity: 0.25; text-align: right; }
 
 /* ═══ TAGLINE ═══ */
 
@@ -142,7 +145,7 @@ html, body {
   font-style: italic;
   font-size: 16px;
   letter-spacing: 8px;
-  color: var(--gold-light);
+  color: var(--star-bright);
   opacity: 0;
   white-space: nowrap;
   pointer-events: none;
@@ -214,7 +217,7 @@ html, body {
 
 @keyframes taglinePulse {
   0%, 100% { opacity: 0.38; text-shadow: none; }
-  50%       { opacity: 0.72; text-shadow: 0 0 24px rgba(240,204,136,0.30), 0 0 8px rgba(212,168,83,0.20); }
+  50%       { opacity: 0.72; text-shadow: 0 0 28px rgba(232,228,244,0.28), 0 0 10px rgba(180,170,220,0.18); }
 }
 
 #truth-link.revealed {
@@ -256,7 +259,7 @@ html, body {
   font-style: italic;
   font-size: 14px;
   letter-spacing: 7px;
-  color: var(--gold-light);
+  color: var(--star-bright);
   opacity: 0;
   transition: opacity 1.8s ease;
   white-space: nowrap;

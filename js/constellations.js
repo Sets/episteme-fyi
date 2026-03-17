@@ -207,7 +207,7 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, 
     animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  0,
     animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  BOX_W * 0.55
   );
-  g1.addColorStop(0,   `rgba(80,50,160,${0.38*boxAlpha})`);
+  g1.addColorStop(0,   `rgba(60,45,140,${0.42*boxAlpha})`);
   g1.addColorStop(0.5, `rgba(40,20,90,${0.18*boxAlpha})`);
   g1.addColorStop(1,   `rgba(0,0,0,0)`);
   ctx.fillStyle = g1;
@@ -220,7 +220,7 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, 
     animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, 0,
     animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, BOX_W * 0.45
   );
-  g2.addColorStop(0,   `rgba(140,120,220,${0.22*boxAlpha})`);
+  g2.addColorStop(0,   `rgba(120,105,200,${0.26*boxAlpha})`);
   g2.addColorStop(0.6, `rgba(60,40,120,${0.10*boxAlpha})`);
   g2.addColorStop(1,   `rgba(0,0,0,0)`);
   ctx.fillStyle = g2;
@@ -260,7 +260,7 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
   if (isManifesto) {
     drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, bh);
   } else {
-    ctx.fillStyle = `rgba(10,8,18,${0.82*boxAlpha})`;
+    ctx.fillStyle = `rgba(8,7,16,${0.85*boxAlpha})`;
     ctx.beginPath();
     ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
     ctx.fill();
@@ -268,8 +268,8 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
 
   // Base border (dim)
   ctx.strokeStyle = isManifesto
-    ? `rgba(200,184,232,${0.18*boxAlpha})`
-    : `rgba(212,168,83,${0.16*boxAlpha})`;
+    ? `rgba(200,192,235,${0.28*boxAlpha})`
+    : `rgba(180,172,220,${0.22*boxAlpha})`;
   ctx.lineWidth = 0.7;
   ctx.beginPath();
   ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
@@ -286,9 +286,7 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
 
   // Corner accents
   const cSize = 3;
-  ctx.fillStyle = isManifesto
-    ? `rgba(200,184,232,${0.5*boxAlpha})`
-    : `rgba(212,168,83,${0.45*boxAlpha})`;
+  ctx.fillStyle = `rgba(210,205,240,${0.45*boxAlpha})`;
   [[animBx-hw,animBy-hh],[animBx+hw-cSize,animBy-hh],
    [animBx-hw,animBy+hh-cSize],[animBx+hw-cSize,animBy+hh-cSize]
   ].forEach(([x,y]) => ctx.fillRect(x,y,cSize,cSize));
@@ -310,10 +308,10 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
       ? `700 11px 'Space Mono', monospace`
       : `${fontSize} 'Space Mono', monospace`;
     ctx.fillStyle = isFirstLine
-      ? `rgba(255,240,180,${0.95*boxAlpha})`
+      ? `rgba(244,242,255,${0.98*boxAlpha})`
       : isManifesto
-        ? `rgba(240,220,160,${0.9*boxAlpha})`
-        : `rgba(200,184,232,${0.85*boxAlpha})`;
+        ? `rgba(232,228,244,${0.92*boxAlpha})`
+        : `rgba(220,216,240,${0.90*boxAlpha})`;
     ctx.fillText(line, animBx, animBy - totalH/2 + lineH*0.5 + li*lineH);
   });
 }
@@ -408,18 +406,14 @@ export function drawConstellation(time) {
     const { ex, ey } = boxEdgePoint(animBx, animBy, cx, cy);
 
     // Line
-    ctx.strokeStyle = isManifesto
-      ? `rgba(212,168,83,${0.20*np})`
-      : `rgba(200,184,232,${0.22*np})`;
+    ctx.strokeStyle = `rgba(190,185,225,${0.20*np})`;
     ctx.lineWidth = 0.7;
     ctx.setLineDash([3, 6]);
     ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.setLineDash([]);
 
     // Dot
-    ctx.fillStyle = isManifesto
-      ? `rgba(200,184,232,${0.7*np})`
-      : `rgba(212,168,83,${0.65*np})`;
+    ctx.fillStyle = `rgba(220,215,245,${0.65*np})`;
     ctx.beginPath(); ctx.arc(ex,ey,2.2,0,Math.PI*2); ctx.fill();
 
     drawBox(ctx, animBx, animBy, node, np, isManifesto, time, node.hero);
@@ -428,9 +422,7 @@ export function drawConstellation(time) {
   // ── Title ──
   if (a.progress > 0.75) {
     const ta = (a.progress - 0.75) / 0.25;
-    ctx.fillStyle = isManifesto
-      ? `rgba(200,184,232,${0.35*ta})`
-      : `rgba(212,168,83,${0.32*ta})`;
+    ctx.fillStyle = `rgba(200,196,228,${0.38*ta})`;
     ctx.font = `700 9px 'Space Mono', monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
