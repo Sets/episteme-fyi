@@ -256,13 +256,13 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
 
   const t = globalTime * 0.001;
 
-  // Background
-  if (isManifesto) {
+  // Background — hero and manifesto get mercury, others solid dark
+  if (isManifesto || hero) {
     drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, bh);
   } else {
     ctx.fillStyle = `rgba(8,7,16,${0.85*boxAlpha})`;
     ctx.beginPath();
-    ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+    ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
     ctx.fill();
   }
 
@@ -272,7 +272,7 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
     : `rgba(180,172,220,${0.22*boxAlpha})`;
   ctx.lineWidth = 0.7;
   ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
   ctx.stroke();
 
   // Inner glow
@@ -281,11 +281,11 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
     : `rgba(200,184,232,${0.08*boxAlpha})`;
   ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.roundRect(animBx-hw+2, animBy-hh+2, BOX_W-4, BOX_H-4, r);
+  ctx.roundRect(animBx-hw+2, animBy-hh+2, bw-4, bh-4, r);
   ctx.stroke();
 
   // Corner accents
-  const cSize = 3;
+  const cSize = hero ? 4 : 3;
   ctx.fillStyle = `rgba(210,205,240,${0.45*boxAlpha})`;
   [[animBx-hw,animBy-hh],[animBx+hw-cSize,animBy-hh],
    [animBx-hw,animBy+hh-cSize],[animBx+hw-cSize,animBy+hh-cSize]
