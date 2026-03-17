@@ -35,6 +35,7 @@ export const CONSTELLATIONS = [
   {
     id: 'alternet',
     title: 'ALTERNET',
+    subtitle: 'agentic communications',
     nodes: [
       { label: ['ideas are nothing.', 'target · strategy · plan', 'execution — everything.'], angle: 0,   dist: 0.22, hero: true },
       { label: ['consensus kills', 'real inquiry'],               angle: 48,  dist: 0.26 },
@@ -420,14 +421,21 @@ export function drawConstellation(time) {
     drawBox(ctx, animBx, animBy, node, np, isManifesto, time, node.hero);
   });
 
-  // ── Title ──
+  // ── Title + subtitle ──
   if (a.progress > 0.75) {
     const ta = (a.progress - 0.75) / 0.25;
+    ctx.textAlign = 'center';
+
     ctx.fillStyle = `rgba(200,196,228,${0.38*ta})`;
     ctx.font = `700 9px 'Space Mono', monospace`;
-    ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(a.def.title, cx, cy - 54);
+
+    if (a.def.subtitle) {
+      ctx.fillStyle = `rgba(180,174,220,${0.28*ta})`;
+      ctx.font = `7px 'Space Mono', monospace`;
+      ctx.fillText(a.def.subtitle.toUpperCase(), cx, cy - 42);
+    }
   }
 
   ctx.restore();
