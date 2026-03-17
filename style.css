@@ -138,7 +138,7 @@ html, body {
 
 #tagline {
   position: fixed;
-  bottom: 18%;
+  top: 28%;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--serif);
