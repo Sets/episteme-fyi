@@ -35,7 +35,7 @@ export const CONSTELLATIONS = [
   {
     id: 'manifesto',
     title: 'EPISTEME',
-    manifesto: true,   // special render mode
+    manifesto: true,
     nodes: [
       { label: ['truth over', 'narrative'],          angle: 0,    dist: 0.26 },
       { label: ['facts only,', 'no spin'],           angle: 45,   dist: 0.22 },
@@ -53,12 +53,11 @@ export const CONSTELLATIONS = [
 const BOX_W  = 108;
 const BOX_H  = 38;
 const MARGIN = 14;
+const BORDER_R = 4;
 
 // ═══ ACTIVE STATE ═══
 
-export const constellationState = {
-  active: null,
-};
+export const constellationState = { active: null };
 
 export function showConstellation(def, cx, cy) {
   if (constellationState.active?.def.id === def.id) return;
@@ -99,105 +98,178 @@ function boxEdgePoint(bx, by, fromX, fromY) {
   return { ex: bx + dx*t, ey: by + dy*t };
 }
 
+// ═══ BORDER LIGHT SWEEP ═══
+// Draws a comet-like light orb that travels around the box perimeter
+
+function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha) {
+  const hw = BOX_W/2, hh = BOX_H/2;
+  const perimeter = 2 * (BOX_W + BOX_H);
+
+  // Each node gets a slightly different phase offset via bx+by
+  const phase   = ((t * 0.55 + (bx + by) * 0.004) % 1 + 1) % 1;
+  const pos     = phase * perimeter;
+
+  // Perimeter path: top→right→bottom→left
+  // Returns {x, y, tangentAngle} at distance d along the border
+  function perimPoint(d) {
+    d = ((d % perimeter) + perimeter) % perimeter;
+    const top = BOX_W, right = BOX_H, bottom = BOX_W, left = BOX_H;
+    let x, y, tx, ty;
+    if (d < top) {
+      x = bx - hw + d; y = by - hh; tx = 1; ty = 0;
+    } else if (d < top + right) {
+      x = bx + hw; y = by - hh + (d - top); tx = 0; ty = 1;
+    } else if (d < top + right + bottom) {
+      x = bx + hw - (d - top - right); y = by + hh; tx = -1; ty = 0;
+    } else {
+      x = bx - hw; y = by + hh - (d - top - right - bottom); tx = 0; ty = -1;
+    }
+    return { x, y, tx, ty };
+  }
+
+  // ── Comet trail ──
+  const trailLen  = 60;
+  const trailSegs = 18;
+  for (let i = 0; i < trailSegs; i++) {
+    const frac = i / trailSegs;
+    const { x, y } = perimPoint(pos - frac * trailLen);
+    const trailAlpha = (1 - frac) * (isManifesto ? 0.22 : 0.18) * boxAlpha;
+
+    const r = isManifesto ? 200 : 212;
+    const g = isManifesto ? 184 : 168;
+    const b = isManifesto ? 232 : 83;
+
+    ctx.fillStyle = `rgba(${r},${g},${b},${trailAlpha})`;
+    const sz = (1 - frac) * 2.2;
+    ctx.fillRect(x - sz/2, y - sz/2, sz, sz);
+  }
+
+  // ── Head orb ──
+  const { x: hx, y: hy } = perimPoint(pos);
+  const orbR = isManifesto ? 200 : 212;
+  const orbG = isManifesto ? 184 : 168;
+  const orbB = isManifesto ? 232 : 83;
+  const orbAlpha = 0.85 * boxAlpha;
+
+  // Outer glow
+  const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 7);
+  grad.addColorStop(0, `rgba(${orbR},${orbG},${orbB},${orbAlpha * 0.6})`);
+  grad.addColorStop(1, `rgba(${orbR},${orbG},${orbB},0)`);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(hx, hy, 7, 0, Math.PI*2);
+  ctx.fill();
+
+  // Core dot
+  ctx.fillStyle = `rgba(${orbR},${orbG},${orbB},${orbAlpha})`;
+  ctx.beginPath();
+  ctx.arc(hx, hy, 1.8, 0, Math.PI*2);
+  ctx.fill();
+}
+
 // ═══ SHARED BOX DRAW ═══
 
-function drawBox(ctx, animBx, animBy, node, np, isManifesto) {
-  const hw = BOX_W/2, hh = BOX_H/2, r = 4;
+function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
+  const hw = BOX_W/2, hh = BOX_H/2, r = BORDER_R;
   const boxAlpha = Math.max(0, (np - 0.25) / 0.75);
   if (boxAlpha <= 0) return;
 
   // Background
-  const bgColor = isManifesto
+  ctx.fillStyle = isManifesto
     ? `rgba(8,6,22,${0.88*boxAlpha})`
     : `rgba(10,8,18,${0.82*boxAlpha})`;
-  ctx.fillStyle = bgColor;
   ctx.beginPath();
   ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
   ctx.fill();
 
-  // Gold border
-  const borderColor = isManifesto
-    ? `rgba(200,184,232,${0.35*boxAlpha})`
-    : `rgba(212,168,83,${0.28*boxAlpha})`;
-  ctx.strokeStyle = borderColor;
+  // Base border (dim)
+  ctx.strokeStyle = isManifesto
+    ? `rgba(200,184,232,${0.18*boxAlpha})`
+    : `rgba(212,168,83,${0.16*boxAlpha})`;
   ctx.lineWidth = 0.7;
   ctx.beginPath();
   ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
   ctx.stroke();
 
   // Inner glow
-  const glowColor = isManifesto
-    ? `rgba(212,168,83,${0.10*boxAlpha})`
-    : `rgba(200,184,232,${0.10*boxAlpha})`;
-  ctx.strokeStyle = glowColor;
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = isManifesto
+    ? `rgba(212,168,83,${0.08*boxAlpha})`
+    : `rgba(200,184,232,${0.08*boxAlpha})`;
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.roundRect(animBx-hw+2, animBy-hh+2, BOX_W-4, BOX_H-4, r);
   ctx.stroke();
 
   // Corner accents
   const cSize = 3;
-  const cornerColor = isManifesto
+  ctx.fillStyle = isManifesto
     ? `rgba(200,184,232,${0.5*boxAlpha})`
     : `rgba(212,168,83,${0.45*boxAlpha})`;
-  ctx.fillStyle = cornerColor;
   [[animBx-hw,animBy-hh],[animBx+hw-cSize,animBy-hh],
    [animBx-hw,animBy+hh-cSize],[animBx+hw-cSize,animBy+hh-cSize]
   ].forEach(([x,y]) => ctx.fillRect(x,y,cSize,cSize));
 
+  // ── Border light sweep (only when fully visible) ──
+  if (boxAlpha > 0.4) {
+    const t = globalTime * 0.001;
+    drawBorderLight(ctx, animBx, animBy, t, isManifesto, boxAlpha);
+  }
+
   // Label text
   const lineH = 11;
   const totalH = node.label.length * lineH;
-  const textColor = isManifesto
+  ctx.fillStyle = isManifesto
     ? `rgba(240,220,160,${0.9*boxAlpha})`
     : `rgba(200,184,232,${0.85*boxAlpha})`;
-  ctx.fillStyle = textColor;
   ctx.font = `9px 'Space Mono', monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   node.label.forEach((line, li) => {
-    const ty = animBy - totalH/2 + lineH*0.5 + li*lineH;
-    ctx.fillText(line, animBx, ty);
+    ctx.fillText(line, animBx, animBy - totalH/2 + lineH*0.5 + li*lineH);
   });
 }
 
-// ═══ DRAW MANIFESTO EMBLEM (larger, violet-accented) ═══
+// ═══ MANIFESTO EMBLEM ═══
 
 function drawManifestoEmblem(ctx, cx, cy, ep) {
-  const er = 42 * ep;
-
-  // Outer ring — violet
-  ctx.strokeStyle = `rgba(200,184,232,${0.6*ep})`;
-  ctx.lineWidth = 0.9;
-  ctx.beginPath(); ctx.arc(cx, cy, er, 0, Math.PI*2); ctx.stroke();
-
-  // Middle ring — gold
-  ctx.strokeStyle = `rgba(212,168,83,${0.4*ep})`;
-  ctx.lineWidth = 0.6;
-  ctx.beginPath(); ctx.arc(cx, cy, er*0.65, 0, Math.PI*2); ctx.stroke();
-
-  // Inner ring
-  ctx.strokeStyle = `rgba(200,184,232,${0.25*ep})`;
-  ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.arc(cx, cy, er*0.38, 0, Math.PI*2); ctx.stroke();
-
-  // Diagonal ticks (45° rotated)
-  ctx.strokeStyle = `rgba(200,184,232,${0.45*ep})`;
-  ctx.lineWidth = 0.6;
+  const er = 42*ep;
+  ctx.strokeStyle=`rgba(200,184,232,${0.6*ep})`; ctx.lineWidth=0.9;
+  ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
+  ctx.beginPath(); ctx.arc(cx,cy,er*0.65,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=`rgba(200,184,232,${0.25*ep})`; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.arc(cx,cy,er*0.38,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=`rgba(200,184,232,${0.45*ep})`; ctx.lineWidth=0.6;
   [0,45,90,135,180,225,270,315].forEach(deg => {
-    const rad = deg*Math.PI/180;
+    const rad=deg*Math.PI/180;
     ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(rad)*(er+2), cy + Math.sin(rad)*(er+2));
-    ctx.lineTo(cx + Math.cos(rad)*(er+er*0.28), cy + Math.sin(rad)*(er+er*0.28));
+    ctx.moveTo(cx+Math.cos(rad)*(er+2), cy+Math.sin(rad)*(er+2));
+    ctx.lineTo(cx+Math.cos(rad)*(er+er*0.28), cy+Math.sin(rad)*(er+er*0.28));
     ctx.stroke();
   });
+  ctx.fillStyle=`rgba(212,168,83,${0.95*ep})`;
+  ctx.font=`${Math.round(er*0.95)}px 'Space Mono', monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('ε',cx,cy+1);
+}
 
-  // ε — gold, larger
-  ctx.fillStyle = `rgba(212,168,83,${0.95*ep})`;
-  ctx.font = `${Math.round(er*0.95)}px 'Space Mono', monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('ε', cx, cy+1);
+function drawDefaultEmblem(ctx, cx, cy, ep) {
+  const er=34*ep;
+  ctx.strokeStyle=`rgba(212,168,83,${0.55*ep})`; ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=`rgba(200,184,232,${0.3*ep})`; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.arc(cx,cy,er*0.55,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
+  [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*(er+2),cy+dy*(er+2));
+    ctx.lineTo(cx+dx*(er+er*0.35),cy+dy*(er+er*0.35));
+    ctx.stroke();
+  });
+  ctx.fillStyle=`rgba(212,168,83,${0.9*ep})`;
+  ctx.font=`${Math.round(er*0.9)}px 'Space Mono', monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('ε',cx,cy+1);
 }
 
 // ═══ MAIN DRAW ═══
@@ -232,26 +304,9 @@ export function drawConstellation(time) {
   // ── Emblem ──
   const ep = Math.min(1, a.progress * 3);
   if (ep > 0) {
-    if (isManifesto) {
-      drawManifestoEmblem(ctx, cx, cy, ep);
-    } else {
-      const er = 34 * ep;
-      ctx.strokeStyle=`rgba(212,168,83,${0.55*ep})`; ctx.lineWidth=0.8;
-      ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
-      ctx.strokeStyle=`rgba(200,184,232,${0.3*ep})`; ctx.lineWidth=0.5;
-      ctx.beginPath(); ctx.arc(cx,cy,er*0.55,0,Math.PI*2); ctx.stroke();
-      ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
-      [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
-        ctx.beginPath();
-        ctx.moveTo(cx+dx*(er+2),cy+dy*(er+2));
-        ctx.lineTo(cx+dx*(er+er*0.35),cy+dy*(er+er*0.35));
-        ctx.stroke();
-      });
-      ctx.fillStyle=`rgba(212,168,83,${0.9*ep})`;
-      ctx.font=`${Math.round(er*0.9)}px 'Space Mono', monospace`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('ε', cx, cy+1);
-    }
+    isManifesto
+      ? drawManifestoEmblem(ctx, cx, cy, ep)
+      : drawDefaultEmblem(ctx, cx, cy, ep);
   }
 
   // ── Nodes ──
@@ -264,23 +319,21 @@ export function drawConstellation(time) {
     const { ex, ey } = boxEdgePoint(animBx, animBy, cx, cy);
 
     // Line
-    const lineColor = isManifesto
+    ctx.strokeStyle = isManifesto
       ? `rgba(212,168,83,${0.20*np})`
       : `rgba(200,184,232,${0.22*np})`;
-    ctx.strokeStyle = lineColor;
     ctx.lineWidth = 0.7;
     ctx.setLineDash([3, 6]);
-    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.setLineDash([]);
 
-    // Dot at edge
-    const dotColor = isManifesto
+    // Dot
+    ctx.fillStyle = isManifesto
       ? `rgba(200,184,232,${0.7*np})`
       : `rgba(212,168,83,${0.65*np})`;
-    ctx.fillStyle = dotColor;
-    ctx.beginPath(); ctx.arc(ex, ey, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex,ey,2.2,0,Math.PI*2); ctx.fill();
 
-    drawBox(ctx, animBx, animBy, node, np, isManifesto);
+    drawBox(ctx, animBx, animBy, node, np, isManifesto, time);
   });
 
   // ── Title ──
