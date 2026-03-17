@@ -45,6 +45,7 @@ export const CONSTELLATIONS = [
       { label: ['manipulation', 'is the enemy'],     angle: 225,  dist: 0.22 },
       { label: ['radical', 'transparency'],          angle: 270,  dist: 0.25 },
       { label: ['knowledge,', 'unveiled'],           angle: 315,  dist: 0.22 },
+      { label: ['no marketing', 'bullshit'],         angle: 338,  dist: 0.23 },
     ],
   },
 ];
