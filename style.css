@@ -193,7 +193,21 @@ html, body {
 #hud-tr.revealed  { opacity: 0.22; }
 #hud-bl.revealed  { opacity: 0.22; }
 #hud-br.revealed  { opacity: 0.25; }
-#tagline.revealed { opacity: 0.45; }
+#tagline.revealed {
+  opacity: 0.45;
+  animation: taglinePulse 3.5s ease-in-out infinite;
+}
+
+#tagline.hovered {
+  animation: none !important;
+  opacity: 0.15 !important;
+  transition: opacity 0.6s ease;
+}
+
+@keyframes taglinePulse {
+  0%, 100% { opacity: 0.22; text-shadow: none; }
+  50%       { opacity: 0.58; text-shadow: 0 0 18px rgba(212,168,83,0.25); }
+}
 
 #truth-link.revealed {
   opacity: 1;

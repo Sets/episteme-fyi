@@ -24,9 +24,36 @@ function checkReveals() {
   if (d > 600) { reveal('tagline'); }
 }
 
-// ═══ TAGLINE HOVER ═══
+// ═══ TAGLINE HOVER + PARTICLE SCATTER ═══
 
 let taglineHovered = false;
+
+function scatterParticles() {
+  // Explode particles outward from center in circular bursts
+  const { W, H, particles } = state;
+  const cx = W / 2, cy = H / 2;
+  for (const p of particles) {
+    if (!p.target) continue;   // only text particles
+    const dx = p.x - cx, dy = p.y - cy;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const force = 6 + Math.random() * 8;
+    p.vx += (dx / dist) * force + (Math.random() - 0.5) * 4;
+    p.vy += (dy / dist) * force + (Math.random() - 0.5) * 4;
+  }
+}
+
+function gatherParticles() {
+  // Snap attraction back to full strength — particles reassemble
+  // (phase is already episteme, just boost attraction momentarily)
+  const { particles } = state;
+  for (const p of particles) {
+    if (!p.target) continue;
+    const dx = p.target.x - p.x;
+    const dy = p.target.y - p.y;
+    p.vx += dx * 0.12;
+    p.vy += dy * 0.12;
+  }
+}
 
 function setupTaglineHover() {
   const tagline = document.getElementById('tagline');
@@ -37,13 +64,16 @@ function setupTaglineHover() {
 
   tagline.addEventListener('mouseenter', () => {
     taglineHovered = true;
+    tagline.classList.add('hovered');
+    scatterParticles();
     const { W, H } = state;
     showConstellation(manifestoDef, W/2, H/2);
   });
 
   tagline.addEventListener('mouseleave', () => {
     taglineHovered = false;
-    // Only hide if it's the manifesto
+    tagline.classList.remove('hovered');
+    gatherParticles();
     if (constellationState.active?.def.id === 'manifesto') {
       hideConstellation();
     }
