@@ -18,7 +18,8 @@ export const state = {
   warpStreaks: [],
 
   booted: false,
-  phase: 'doxa',   // doxa → episteme (transitions after boot)
+  phase: 'doxa',
+  scattered: false,   // doxa → episteme (transitions after boot)
 
   interaction: {
     mouseDist: 0,

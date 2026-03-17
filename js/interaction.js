@@ -29,29 +29,32 @@ function checkReveals() {
 let taglineHovered = false;
 
 function scatterParticles() {
-  // Explode particles outward from center in circular bursts
+  // Disable text attraction first so particles don't snap back
+  state.scattered = true;
+
   const { W, H, particles } = state;
   const cx = W / 2, cy = H / 2;
   for (const p of particles) {
-    if (!p.target) continue;   // only text particles
+    if (!p.target) continue;
     const dx = p.x - cx, dy = p.y - cy;
     const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-    const force = 6 + Math.random() * 8;
-    p.vx += (dx / dist) * force + (Math.random() - 0.5) * 4;
-    p.vy += (dy / dist) * force + (Math.random() - 0.5) * 4;
+    const force = 8 + Math.random() * 10;
+    p.vx += (dx / dist) * force + (Math.random() - 0.5) * 5;
+    p.vy += (dy / dist) * force + (Math.random() - 0.5) * 5;
   }
 }
 
 function gatherParticles() {
-  // Snap attraction back to full strength — particles reassemble
-  // (phase is already episteme, just boost attraction momentarily)
+  // Re-enable text attraction + strong impulse back to targets
+  state.scattered = false;
+
   const { particles } = state;
   for (const p of particles) {
     if (!p.target) continue;
     const dx = p.target.x - p.x;
     const dy = p.target.y - p.y;
-    p.vx += dx * 0.12;
-    p.vy += dy * 0.12;
+    p.vx += dx * 0.14;
+    p.vy += dy * 0.14;
   }
 }
 

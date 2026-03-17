@@ -140,13 +140,14 @@ html, body {
   transform: translateX(-50%);
   font-family: var(--serif);
   font-style: italic;
-  font-size: 13px;
-  letter-spacing: 6px;
-  color: var(--gold);
-  opacity: 0.45;
+  font-size: 16px;
+  letter-spacing: 8px;
+  color: var(--gold-light);
+  opacity: 0;
   white-space: nowrap;
   pointer-events: none;
   z-index: 10;
+  transition: opacity 0.6s ease;
 }
 
 /* ═══ TRUTH LINK ═══ */
@@ -194,10 +195,15 @@ html, body {
 #hud-bl.revealed  { opacity: 0.22; }
 #hud-br.revealed  { opacity: 0.25; }
 #tagline.revealed {
-  opacity: 0.45;
   pointer-events: auto;
   cursor: default;
-  animation: taglinePulse 3.5s ease-in-out infinite;
+  animation: taglineReveal 1.2s ease forwards, taglinePulse 3.5s ease-in-out 1.2s infinite;
+}
+
+@keyframes taglineReveal {
+  0%   { opacity: 0;    letter-spacing: 14px; filter: blur(6px); }
+  60%  { opacity: 0.7;  letter-spacing: 7px;  filter: blur(0px); }
+  100% { opacity: 0.55; letter-spacing: 8px;  filter: blur(0px); }
 }
 
 #tagline.hovered {
@@ -207,8 +213,8 @@ html, body {
 }
 
 @keyframes taglinePulse {
-  0%, 100% { opacity: 0.22; text-shadow: none; }
-  50%       { opacity: 0.58; text-shadow: 0 0 18px rgba(212,168,83,0.25); }
+  0%, 100% { opacity: 0.38; text-shadow: none; }
+  50%       { opacity: 0.72; text-shadow: 0 0 24px rgba(240,204,136,0.30), 0 0 8px rgba(212,168,83,0.20); }
 }
 
 #truth-link.revealed {

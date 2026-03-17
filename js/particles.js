@@ -77,8 +77,9 @@ export function updateParticles(time) {
   const t = time * CONFIG.flowSpeed;
   const r2 = CONFIG.mouseRadius * CONFIG.mouseRadius;
 
-  // doxa phase: particles resist forming — weaker text attraction
-  const doxaFactor = state.phase === 'doxa' ? 0.28 : 1.0;
+  // doxa phase OR scatter mode: suppress text attraction
+  const isScattered = !!state.scattered;
+  const doxaFactor = state.phase === 'doxa' ? 0.28 : isScattered ? 0.0 : 1.0;
 
   for (const p of particles) {
     const nx = noise.noise3D(p.x*CONFIG.flowScale, p.y*CONFIG.flowScale, t);
