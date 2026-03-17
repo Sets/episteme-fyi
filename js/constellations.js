@@ -199,33 +199,33 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, 
   // Base fill — very dark violet
   ctx.fillStyle = `rgba(6,4,18,${0.92*boxAlpha})`;
   ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
   ctx.fill();
 
   // Shimmer blob 1 — slow drift
   const g1 = ctx.createRadialGradient(
-    animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  0,
-    animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  BOX_W * 0.55
+    animBx - hw + waveX * bw,  animBy - hh + waveY * bh,  0,
+    animBx - hw + waveX * bw,  animBy - hh + waveY * bh,  bw * 0.55
   );
   g1.addColorStop(0,   `rgba(60,45,140,${0.42*boxAlpha})`);
   g1.addColorStop(0.5, `rgba(40,20,90,${0.18*boxAlpha})`);
   g1.addColorStop(1,   `rgba(0,0,0,0)`);
   ctx.fillStyle = g1;
   ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
   ctx.fill();
 
   // Shimmer blob 2 — faster, cooler
   const g2 = ctx.createRadialGradient(
-    animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, 0,
-    animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, BOX_W * 0.45
+    animBx - hw + waveX2 * bw, animBy + hh * 0.3, 0,
+    animBx - hw + waveX2 * bw, animBy + hh * 0.3, bw * 0.45
   );
   g2.addColorStop(0,   `rgba(120,105,200,${0.26*boxAlpha})`);
   g2.addColorStop(0.6, `rgba(60,40,120,${0.10*boxAlpha})`);
   g2.addColorStop(1,   `rgba(0,0,0,0)`);
   ctx.fillStyle = g2;
   ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
   ctx.fill();
 
   // Surface sheen — thin bright line that slides across
@@ -240,7 +240,7 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, 
 
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.roundRect(animBx-hw, animBy-hh, bw, bh, r);
   ctx.clip();
   ctx.fillStyle = sheenGrad;
   ctx.fillRect(sx1, animBy-hh, sx2-sx1, BOX_H);
