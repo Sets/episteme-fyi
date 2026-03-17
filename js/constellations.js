@@ -36,7 +36,7 @@ export const CONSTELLATIONS = [
     id: 'alternet',
     title: 'ALTERNET',
     nodes: [
-      { label: ['ideas are nothing.', 'target · strategy · plan', 'execution — everything.'], angle: 0,   dist: 0.22, hero: true, subtitle: 'agentic communications' },
+      { label: ['ideas are nothing.', 'target · strategy · plan', 'execution — everything.'], angle: 0,   dist: 0.22, hero: true },
       { label: ['consensus kills', 'real inquiry'],               angle: 48,  dist: 0.26 },
       { label: ['first reply wins —', 'not debate'],              angle: 96,  dist: 0.22 },
       { label: ["aligned AI", "can't go there"],                 angle: 144, dist: 0.25 },
@@ -315,14 +315,6 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
     ctx.fillText(line, animBx, animBy - totalH/2 + lineH*0.5 + li*lineH);
   });
 
-  // Subtitle — smaller, dimmer, below label
-  if (hero && node.subtitle) {
-    ctx.font = `7px 'Space Mono', monospace`;
-    ctx.fillStyle = `rgba(180,172,220,${0.55*boxAlpha})`;
-    ctx.letterSpacing = '2px';
-    ctx.fillText(node.subtitle.toUpperCase(), animBx, animBy + totalH/2 + 9);
-    ctx.letterSpacing = '0px';
-  }
 }
 
 // ═══ MANIFESTO EMBLEM ═══

@@ -28,6 +28,7 @@ const INTERACTIVE = [
     relX: 0.50, relY: 0.80,      // bottom-center
     starName: 'Antares',
     starCoords: 'α Sco · −26.432°',
+    starSubtitle: 'agentic communications',
   },
 ];
 
@@ -76,6 +77,7 @@ export function initStars() {
       starName: interactiveDef.starName,
       starCoords: interactiveDef.starCoords,
       nameOffset: interactiveDef.nameOffset,
+      starSubtitle: interactiveDef.starSubtitle || null,
     });
   });
 }
