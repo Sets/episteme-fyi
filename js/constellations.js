@@ -9,7 +9,8 @@ import { state } from './state.js';
 export const CONSTELLATIONS = [
   {
     id: 'daas',
-    title: 'DATA-AS-A-SERVICE',
+    title: 'DATAINT',
+    subtitle: 'data-as-a-service',
     nodes: [
       { label: ['data brokers', 'hide the source'],  angle: 0,    dist: 0.28 },
       { label: ['clickbait', 'datasets'],            angle: 52,   dist: 0.22 },
@@ -22,7 +23,8 @@ export const CONSTELLATIONS = [
   },
   {
     id: 'ecommerce',
-    title: 'E-COMMERCE',
+    title: 'DISRUPTIVE COMMERCE',
+    subtitle: 'e-commerce platform',
     nodes: [
       { label: ['commission', 'is mandatory?'],      angle: 18,   dist: 0.27 },
       { label: ['your data,', 'their profit'],       angle: 72,   dist: 0.22 },
