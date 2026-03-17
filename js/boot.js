@@ -17,8 +17,8 @@ function typeText(el, text, charDelay) {
 }
 
 export async function bootSequence() {
-  const bootEl  = document.getElementById('boot-screen');
-  const textEl  = document.getElementById('boot-text');
+  const bootEl   = document.getElementById('boot-screen');
+  const textEl   = document.getElementById('boot-text');
   const cursorEl = document.getElementById('boot-cursor');
 
   const lines = [
@@ -27,7 +27,6 @@ export async function bootSequence() {
     '> detecting doxa contamination... found',
     '> filtering opinion from signal...',
     '> ████████████████████ 100%',
-    '> extracting: knowledge · unveiled · real',
     '> truth.layer = active',
   ];
 
@@ -36,19 +35,18 @@ export async function bootSequence() {
     line.className = 'boot-line';
     textEl.appendChild(line);
     cursorEl.style.display = 'none';
-    await typeText(line, text, 16);
+    await typeText(line, text, 8);   // 16 → 8ms per char
     cursorEl.style.display = '';
-    await delay(160);
+    await delay(60);                 // 160 → 60ms between lines
   }
 
-  await delay(700);
+  await delay(300);                  // 700 → 300ms son bekleme
   cursorEl.style.display = 'none';
   bootEl.classList.add('fade-out');
-  await delay(1200);
+  await delay(700);                  // 1200 → 700ms fade
   bootEl.style.display = 'none';
   state.booted = true;
 
-  // Transition: doxa → episteme (particles snap into form)
-  await delay(1000);
+  await delay(400);                  // 1000 → 400ms doxa→episteme
   state.phase = 'episteme';
 }
