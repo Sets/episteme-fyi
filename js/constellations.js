@@ -39,7 +39,7 @@ export const CONSTELLATIONS = [
       { label: ['ideas are nothing.', 'execution — everything.'], angle: 0,   dist: 0.18, hero: true },
       { label: ['consensus kills', 'real inquiry'],               angle: 48,  dist: 0.26 },
       { label: ['first reply wins —', 'not debate'],              angle: 96,  dist: 0.22 },
-      { label: ['aligned AI', 'can't go there'],                 angle: 144, dist: 0.25 },
+      { label: ["aligned AI", "can't go there"],                 angle: 144, dist: 0.25 },
       { label: ['ego over', 'epistemics'],                        angle: 192, dist: 0.22 },
       { label: ['academia', 'gatekeeps truth'],                   angle: 240, dist: 0.26 },
       { label: ['3 layers:', 'thought → claim'],                  angle: 288, dist: 0.22 },
