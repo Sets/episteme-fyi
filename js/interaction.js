@@ -55,7 +55,7 @@ function gatherParticles() {
   }
 }
 
-function setupTaglineHover() {
+export function setupTaglineHover() {
   const tagline = document.getElementById('tagline');
   if (!tagline) return;
 
@@ -135,8 +135,6 @@ function hideHint() {
 
 export function setupInput() {
   const { mouse, interaction } = state;
-
-  setupTaglineHover();
 
   document.addEventListener('mousemove', (e) => {
     if (mouse.active) {

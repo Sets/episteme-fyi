@@ -6,7 +6,7 @@ import { state } from './state.js';
 import { setupCanvas } from './canvas.js';
 import { generateTextTargets, initParticles, updateParticles } from './particles.js';
 import { render } from './renderer.js';
-import { setupInput, startHintTimer } from './interaction.js';
+import { setupInput, startHintTimer, setupTaglineHover } from './interaction.js';
 import { bootSequence } from './boot.js';
 import { initStars } from './stars.js';
 
@@ -61,6 +61,7 @@ async function init() {
   requestAnimationFrame(animate);
   await bootSequence();
   startHintTimer();
+  setupTaglineHover();   // after boot: tagline is revealed, pointer-events active
 }
 
 init();
