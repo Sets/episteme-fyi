@@ -22,6 +22,6 @@ export const CONFIG = {
 export const GRID_SIZE = CONFIG.connectionDist;
 export const WARP_MAX  = isMobile ? 7 : 16;
 
-// episteme palette: amber gold ↔ cold violet-white
-export const WARM = { r: 212, g: 168, b: 83  };
-export const COOL = { r: 200, g: 184, b: 232 };
+// episteme palette: starlight silver ↔ cold violet-white
+export const WARM = { r: 210, g: 205, b: 235 };  // silver-violet
+export const COOL = { r: 180, g: 172, b: 255 };  // deep violet-blue

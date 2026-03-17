@@ -16,7 +16,7 @@ function drawCursor() {
   const { ctx } = state;
   const x=state.mouse.sx, y=state.mouse.sy;
   const sz=12;
-  ctx.strokeStyle='rgba(212,168,83,0.4)';
+  ctx.strokeStyle='rgba(210,205,240,0.35)';
   ctx.lineWidth=0.7;
   ctx.beginPath();
   ctx.moveTo(x-sz,y); ctx.lineTo(x-4,y);
@@ -24,7 +24,7 @@ function drawCursor() {
   ctx.moveTo(x,y-sz); ctx.lineTo(x,y-4);
   ctx.moveTo(x,y+4);  ctx.lineTo(x,y+sz);
   ctx.stroke();
-  ctx.fillStyle='rgba(200,184,232,0.75)';
+  ctx.fillStyle='rgba(232,228,255,0.80)';
   ctx.beginPath();
   ctx.arc(x,y,1.4,0,Math.PI*2);
   ctx.fill();

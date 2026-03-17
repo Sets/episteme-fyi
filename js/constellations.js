@@ -67,8 +67,8 @@ export const CONSTELLATIONS = [
 // ═══ BOX DIMENSIONS ═══
 const BOX_W      = 108;
 const BOX_H      = 38;
-const HERO_BOX_W = 260;
-const HERO_BOX_H = 66;
+const HERO_BOX_W = 272;
+const HERO_BOX_H = 76;
 const MARGIN     = 14;
 const BORDER_R   = 4;
 
@@ -320,13 +320,13 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
 
 function drawManifestoEmblem(ctx, cx, cy, ep) {
   const er = 42*ep;
-  ctx.strokeStyle=`rgba(200,184,232,${0.6*ep})`; ctx.lineWidth=0.9;
+  ctx.strokeStyle=`rgba(210,205,240,${0.65*ep})`; ctx.lineWidth=0.9;
   ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
+  ctx.strokeStyle=`rgba(190,185,225,${0.35*ep})`; ctx.lineWidth=0.6;
   ctx.beginPath(); ctx.arc(cx,cy,er*0.65,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle=`rgba(200,184,232,${0.25*ep})`; ctx.lineWidth=0.5;
+  ctx.strokeStyle=`rgba(210,205,240,${0.20*ep})`; ctx.lineWidth=0.5;
   ctx.beginPath(); ctx.arc(cx,cy,er*0.38,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle=`rgba(200,184,232,${0.45*ep})`; ctx.lineWidth=0.6;
+  ctx.strokeStyle=`rgba(210,205,240,${0.40*ep})`; ctx.lineWidth=0.6;
   [0,45,90,135,180,225,270,315].forEach(deg => {
     const rad=deg*Math.PI/180;
     ctx.beginPath();
@@ -334,7 +334,7 @@ function drawManifestoEmblem(ctx, cx, cy, ep) {
     ctx.lineTo(cx+Math.cos(rad)*(er+er*0.28), cy+Math.sin(rad)*(er+er*0.28));
     ctx.stroke();
   });
-  ctx.fillStyle=`rgba(212,168,83,${0.95*ep})`;
+  ctx.fillStyle=`rgba(232,228,248,${0.95*ep})`;
   ctx.font=`${Math.round(er*0.95)}px 'Space Mono', monospace`;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('ε',cx,cy+1);
@@ -342,18 +342,18 @@ function drawManifestoEmblem(ctx, cx, cy, ep) {
 
 function drawDefaultEmblem(ctx, cx, cy, ep) {
   const er=34*ep;
-  ctx.strokeStyle=`rgba(212,168,83,${0.55*ep})`; ctx.lineWidth=0.8;
+  ctx.strokeStyle=`rgba(210,205,240,${0.55*ep})`; ctx.lineWidth=0.8;
   ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle=`rgba(200,184,232,${0.3*ep})`; ctx.lineWidth=0.5;
+  ctx.strokeStyle=`rgba(190,185,225,${0.3*ep})`; ctx.lineWidth=0.5;
   ctx.beginPath(); ctx.arc(cx,cy,er*0.55,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
+  ctx.strokeStyle=`rgba(210,205,240,${0.4*ep})`; ctx.lineWidth=0.6;
   [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
     ctx.beginPath();
     ctx.moveTo(cx+dx*(er+2),cy+dy*(er+2));
     ctx.lineTo(cx+dx*(er+er*0.35),cy+dy*(er+er*0.35));
     ctx.stroke();
   });
-  ctx.fillStyle=`rgba(212,168,83,${0.9*ep})`;
+  ctx.fillStyle=`rgba(232,228,248,${0.92*ep})`;
   ctx.font=`${Math.round(er*0.9)}px 'Space Mono', monospace`;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('ε',cx,cy+1);

@@ -97,11 +97,11 @@ export function drawStars(time) {
       const haloR = (s.hovered ? 22 : 14) + pulse*5;
       const haloA = (s.hovered ? 0.18 : 0.07) + pulse*0.06;
 
-      ctx.fillStyle=`rgba(212,168,83,${haloA})`;
+      ctx.fillStyle=`rgba(200,195,240,${haloA})`;
       ctx.beginPath(); ctx.arc(px,py,haloR,0,Math.PI*2); ctx.fill();
 
       // Outer ring hint
-      ctx.strokeStyle=`rgba(212,168,83,${haloA*0.6})`;
+      ctx.strokeStyle=`rgba(200,195,240,${haloA*0.6})`;
       ctx.lineWidth=0.6;
       ctx.beginPath(); ctx.arc(px,py,haloR*1.6,0,Math.PI*2); ctx.stroke();
 
