@@ -32,24 +32,38 @@ export const CONSTELLATIONS = [
       { label: ['marketplace', 'bias'],              angle: 305,  dist: 0.22 },
     ],
   },
+  {
+    id: 'manifesto',
+    title: 'EPISTEME',
+    manifesto: true,   // special render mode
+    nodes: [
+      { label: ['truth over', 'narrative'],          angle: 0,    dist: 0.26 },
+      { label: ['facts only,', 'no spin'],           angle: 45,   dist: 0.22 },
+      { label: ['provenance', 'always visible'],     angle: 90,   dist: 0.25 },
+      { label: ['no hidden', 'agendas'],             angle: 135,  dist: 0.22 },
+      { label: ['data speaks', 'for itself'],        angle: 180,  dist: 0.26 },
+      { label: ['manipulation', 'is the enemy'],     angle: 225,  dist: 0.22 },
+      { label: ['radical', 'transparency'],          angle: 270,  dist: 0.25 },
+      { label: ['knowledge,', 'unveiled'],           angle: 315,  dist: 0.22 },
+    ],
+  },
 ];
 
 // ═══ BOX DIMENSIONS ═══
-const BOX_W      = 108;
-const BOX_H      = 38;
-const BOX_PAD    = 7;
-const MARGIN     = 14;   // min distance from viewport edge
+const BOX_W  = 108;
+const BOX_H  = 38;
+const MARGIN = 14;
 
-// ═══ ACTIVE CONSTELLATION STATE ═══
+// ═══ ACTIVE STATE ═══
 
 export const constellationState = {
   active: null,
 };
 
-export function showConstellation(def, starX, starY) {
+export function showConstellation(def, cx, cy) {
   if (constellationState.active?.def.id === def.id) return;
   constellationState.active = {
-    def, starX, starY,
+    def, starX: cx, starY: cy,
     progress: 0,
     fading: false,
     startTime: performance.now(),
@@ -58,48 +72,135 @@ export function showConstellation(def, starX, starY) {
 
 export function hideConstellation() {
   if (constellationState.active) {
-    constellationState.active.fading = true;
+    constellationState.active.fading    = true;
     constellationState.active.fadeStart = performance.now();
   }
 }
 
-// ═══ CLAMP BOX TO VIEWPORT ═══
+// ═══ HELPERS ═══
 
 function clampBox(cx, cy, angle, rawDist) {
   const { W, H } = state;
-  const rad = (angle * Math.PI) / 180;
+  const rad    = (angle * Math.PI) / 180;
   const spread = Math.min(W, H) * 0.78;
-
   let bx = cx + Math.cos(rad) * spread * rawDist;
   let by = cy + Math.sin(rad) * spread * rawDist;
-
-  // Clamp so box stays fully inside viewport
   bx = Math.max(MARGIN + BOX_W/2, Math.min(W - MARGIN - BOX_W/2, bx));
   by = Math.max(MARGIN + BOX_H/2, Math.min(H - MARGIN - BOX_H/2, by));
-
   return { bx, by };
 }
 
-// ═══ NEAREST EDGE POINT OF BOX ═══
-// Returns the point on the box border closest to (fromX, fromY)
-
 function boxEdgePoint(bx, by, fromX, fromY) {
-  const hw = BOX_W / 2, hh = BOX_H / 2;
+  const hw = BOX_W/2, hh = BOX_H/2;
   const dx = fromX - bx, dy = fromY - by;
-
-  // Intersect ray from box center toward (fromX, fromY) with box edges
   const absDx = Math.abs(dx), absDy = Math.abs(dy);
-  let t;
   if (absDx === 0 && absDy === 0) return { ex: bx, ey: by };
-  if (absDx * hh > absDy * hw) {
-    t = hw / absDx;
-  } else {
-    t = hh / absDy;
-  }
-  return { ex: bx + dx * t, ey: by + dy * t };
+  const t = absDx * hh > absDy * hw ? hw / absDx : hh / absDy;
+  return { ex: bx + dx*t, ey: by + dy*t };
 }
 
-// ═══ DRAW ═══
+// ═══ SHARED BOX DRAW ═══
+
+function drawBox(ctx, animBx, animBy, node, np, isManifesto) {
+  const hw = BOX_W/2, hh = BOX_H/2, r = 4;
+  const boxAlpha = Math.max(0, (np - 0.25) / 0.75);
+  if (boxAlpha <= 0) return;
+
+  // Background
+  const bgColor = isManifesto
+    ? `rgba(8,6,22,${0.88*boxAlpha})`
+    : `rgba(10,8,18,${0.82*boxAlpha})`;
+  ctx.fillStyle = bgColor;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.fill();
+
+  // Gold border
+  const borderColor = isManifesto
+    ? `rgba(200,184,232,${0.35*boxAlpha})`
+    : `rgba(212,168,83,${0.28*boxAlpha})`;
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.stroke();
+
+  // Inner glow
+  const glowColor = isManifesto
+    ? `rgba(212,168,83,${0.10*boxAlpha})`
+    : `rgba(200,184,232,${0.10*boxAlpha})`;
+  ctx.strokeStyle = glowColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw+2, animBy-hh+2, BOX_W-4, BOX_H-4, r);
+  ctx.stroke();
+
+  // Corner accents
+  const cSize = 3;
+  const cornerColor = isManifesto
+    ? `rgba(200,184,232,${0.5*boxAlpha})`
+    : `rgba(212,168,83,${0.45*boxAlpha})`;
+  ctx.fillStyle = cornerColor;
+  [[animBx-hw,animBy-hh],[animBx+hw-cSize,animBy-hh],
+   [animBx-hw,animBy+hh-cSize],[animBx+hw-cSize,animBy+hh-cSize]
+  ].forEach(([x,y]) => ctx.fillRect(x,y,cSize,cSize));
+
+  // Label text
+  const lineH = 11;
+  const totalH = node.label.length * lineH;
+  const textColor = isManifesto
+    ? `rgba(240,220,160,${0.9*boxAlpha})`
+    : `rgba(200,184,232,${0.85*boxAlpha})`;
+  ctx.fillStyle = textColor;
+  ctx.font = `9px 'Space Mono', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  node.label.forEach((line, li) => {
+    const ty = animBy - totalH/2 + lineH*0.5 + li*lineH;
+    ctx.fillText(line, animBx, ty);
+  });
+}
+
+// ═══ DRAW MANIFESTO EMBLEM (larger, violet-accented) ═══
+
+function drawManifestoEmblem(ctx, cx, cy, ep) {
+  const er = 42 * ep;
+
+  // Outer ring — violet
+  ctx.strokeStyle = `rgba(200,184,232,${0.6*ep})`;
+  ctx.lineWidth = 0.9;
+  ctx.beginPath(); ctx.arc(cx, cy, er, 0, Math.PI*2); ctx.stroke();
+
+  // Middle ring — gold
+  ctx.strokeStyle = `rgba(212,168,83,${0.4*ep})`;
+  ctx.lineWidth = 0.6;
+  ctx.beginPath(); ctx.arc(cx, cy, er*0.65, 0, Math.PI*2); ctx.stroke();
+
+  // Inner ring
+  ctx.strokeStyle = `rgba(200,184,232,${0.25*ep})`;
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.arc(cx, cy, er*0.38, 0, Math.PI*2); ctx.stroke();
+
+  // Diagonal ticks (45° rotated)
+  ctx.strokeStyle = `rgba(200,184,232,${0.45*ep})`;
+  ctx.lineWidth = 0.6;
+  [0,45,90,135,180,225,270,315].forEach(deg => {
+    const rad = deg*Math.PI/180;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(rad)*(er+2), cy + Math.sin(rad)*(er+2));
+    ctx.lineTo(cx + Math.cos(rad)*(er+er*0.28), cy + Math.sin(rad)*(er+er*0.28));
+    ctx.stroke();
+  });
+
+  // ε — gold, larger
+  ctx.fillStyle = `rgba(212,168,83,${0.95*ep})`;
+  ctx.font = `${Math.round(er*0.95)}px 'Space Mono', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('ε', cx, cy+1);
+}
+
+// ═══ MAIN DRAW ═══
 
 export function drawConstellation(time) {
   const a = constellationState.active;
@@ -108,9 +209,7 @@ export function drawConstellation(time) {
   const { ctx, W, H } = state;
   const elapsed = time - a.startTime;
 
-  if (!a.fading) {
-    a.progress = Math.min(1, elapsed / 1200);
-  }
+  if (!a.fading) a.progress = Math.min(1, elapsed / 1200);
 
   let alpha = 1;
   if (a.fading) {
@@ -119,137 +218,81 @@ export function drawConstellation(time) {
     if (alpha <= 0) { constellationState.active = null; return; }
   }
 
-  const cx = a.starX;
-  const cy = a.starY;
+  const cx = a.starX, cy = a.starY;
+  const isManifesto = !!a.def.manifesto;
 
-  // Pre-compute all box positions (clamped)
   const nodes = a.def.nodes.map(n => {
     const { bx, by } = clampBox(cx, cy, n.angle, n.dist);
-    const revealAt = n.angle / 360;
-    return { bx, by, label: n.label, revealAt };
+    return { bx, by, label: n.label, revealAt: n.angle / 360 };
   });
 
   ctx.save();
   ctx.globalAlpha = alpha;
 
-  // ── Center emblem ──
+  // ── Emblem ──
   const ep = Math.min(1, a.progress * 3);
   if (ep > 0) {
-    const er = 34 * ep;
-
-    ctx.strokeStyle = `rgba(212,168,83,${0.55*ep})`;
-    ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.arc(cx, cy, er, 0, Math.PI*2); ctx.stroke();
-
-    ctx.strokeStyle = `rgba(200,184,232,${0.3*ep})`;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.arc(cx, cy, er*0.55, 0, Math.PI*2); ctx.stroke();
-
-    ctx.strokeStyle = `rgba(212,168,83,${0.4*ep})`;
-    ctx.lineWidth = 0.6;
-    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
-      ctx.beginPath();
-      ctx.moveTo(cx+dx*(er+2), cy+dy*(er+2));
-      ctx.lineTo(cx+dx*(er+er*0.35), cy+dy*(er+er*0.35));
-      ctx.stroke();
-    });
-
-    ctx.fillStyle = `rgba(212,168,83,${0.9*ep})`;
-    ctx.font = `${Math.round(er*0.9)}px 'Space Mono', monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('ε', cx, cy + 1);
+    if (isManifesto) {
+      drawManifestoEmblem(ctx, cx, cy, ep);
+    } else {
+      const er = 34 * ep;
+      ctx.strokeStyle=`rgba(212,168,83,${0.55*ep})`; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle=`rgba(200,184,232,${0.3*ep})`; ctx.lineWidth=0.5;
+      ctx.beginPath(); ctx.arc(cx,cy,er*0.55,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle=`rgba(212,168,83,${0.4*ep})`; ctx.lineWidth=0.6;
+      [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(cx+dx*(er+2),cy+dy*(er+2));
+        ctx.lineTo(cx+dx*(er+er*0.35),cy+dy*(er+er*0.35));
+        ctx.stroke();
+      });
+      ctx.fillStyle=`rgba(212,168,83,${0.9*ep})`;
+      ctx.font=`${Math.round(er*0.9)}px 'Space Mono', monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('ε', cx, cy+1);
+    }
   }
 
   // ── Nodes ──
-  nodes.forEach((node) => {
-    const np = Math.max(0, Math.min(1,
-      (a.progress - node.revealAt * 0.6) / 0.5
-    ));
+  nodes.forEach(node => {
+    const np = Math.max(0, Math.min(1, (a.progress - node.revealAt*0.6) / 0.5));
     if (np <= 0) return;
 
-    const { bx, by } = node;
-
-    // Animate box sliding out from star center
-    const animBx = cx + (bx - cx) * np;
-    const animBy = cy + (by - cy) * np;
-
-    // ── Connection line: star center → box edge ──
+    const animBx = cx + (node.bx - cx) * np;
+    const animBy = cy + (node.by - cy) * np;
     const { ex, ey } = boxEdgePoint(animBx, animBy, cx, cy);
 
-    ctx.strokeStyle = `rgba(200,184,232,${0.22*np})`;
+    // Line
+    const lineColor = isManifesto
+      ? `rgba(212,168,83,${0.20*np})`
+      : `rgba(200,184,232,${0.22*np})`;
+    ctx.strokeStyle = lineColor;
     ctx.lineWidth = 0.7;
     ctx.setLineDash([3, 6]);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(ex, ey);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
     ctx.setLineDash([]);
 
-    // ── Dot at box edge ──
-    ctx.fillStyle = `rgba(212,168,83,${0.65*np})`;
-    ctx.beginPath();
-    ctx.arc(ex, ey, 2.2, 0, Math.PI*2);
-    ctx.fill();
+    // Dot at edge
+    const dotColor = isManifesto
+      ? `rgba(200,184,232,${0.7*np})`
+      : `rgba(212,168,83,${0.65*np})`;
+    ctx.fillStyle = dotColor;
+    ctx.beginPath(); ctx.arc(ex, ey, 2.2, 0, Math.PI*2); ctx.fill();
 
-    if (np < 0.25) return;
-    const boxAlpha = (np - 0.25) / 0.75;
-
-    // ── Box background ──
-    const hw = BOX_W/2, hh = BOX_H/2;
-    const r = 4; // border radius
-
-    // Background fill
-    ctx.fillStyle = `rgba(10,8,18,${0.82*boxAlpha})`;
-    ctx.beginPath();
-    ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
-    ctx.fill();
-
-    // Border — gold, subtle
-    ctx.strokeStyle = `rgba(212,168,83,${0.28*boxAlpha})`;
-    ctx.lineWidth = 0.7;
-    ctx.beginPath();
-    ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
-    ctx.stroke();
-
-    // Inner glow border — violet
-    ctx.strokeStyle = `rgba(200,184,232,${0.10*boxAlpha})`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(animBx-hw+2, animBy-hh+2, BOX_W-4, BOX_H-4, r);
-    ctx.stroke();
-
-    // Corner accents — tiny gold squares at corners
-    const cSize = 3;
-    [[animBx-hw, animBy-hh],[animBx+hw-cSize, animBy-hh],
-     [animBx-hw, animBy+hh-cSize],[animBx+hw-cSize, animBy+hh-cSize]
-    ].forEach(([x,y]) => {
-      ctx.fillStyle = `rgba(212,168,83,${0.45*boxAlpha})`;
-      ctx.fillRect(x, y, cSize, cSize);
-    });
-
-    // ── Label text ──
-    const lineH = 11;
-    const totalH = node.label.length * lineH;
-    ctx.fillStyle = `rgba(200,184,232,${0.85*boxAlpha})`;
-    ctx.font = `9px 'Space Mono', monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    node.label.forEach((line, li) => {
-      const ty = animBy - totalH/2 + lineH*0.5 + li*lineH;
-      ctx.fillText(line, animBx, ty);
-    });
+    drawBox(ctx, animBx, animBy, node, np, isManifesto);
   });
 
   // ── Title ──
   if (a.progress > 0.75) {
     const ta = (a.progress - 0.75) / 0.25;
-    ctx.fillStyle = `rgba(212,168,83,${0.32*ta})`;
+    ctx.fillStyle = isManifesto
+      ? `rgba(200,184,232,${0.35*ta})`
+      : `rgba(212,168,83,${0.32*ta})`;
     ctx.font = `700 9px 'Space Mono', monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(a.def.title, cx, cy - 46);
+    ctx.fillText(a.def.title, cx, cy - 54);
   }
 
   ctx.restore();

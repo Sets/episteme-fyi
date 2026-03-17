@@ -4,6 +4,9 @@
 
 import { state } from './state.js';
 import { checkStarHover } from './stars.js';
+import { CONSTELLATIONS, constellationState, showConstellation, hideConstellation } from './constellations.js';
+
+const manifestoDef = CONSTELLATIONS.find(c => c.id === 'manifesto');
 
 // ═══ REVEAL SYSTEM ═══
 
@@ -16,9 +19,35 @@ function reveal(id) {
 
 function checkReveals() {
   const d = state.interaction.mouseDist;
-  if (d > 300)  reveal('hud-tl');
-  if (d > 420)  { reveal('hud-tr'); reveal('hud-bl'); reveal('hud-br'); }
-  if (d > 600)  { reveal('tagline'); }
+  if (d > 300) reveal('hud-tl');
+  if (d > 420) { reveal('hud-tr'); reveal('hud-bl'); reveal('hud-br'); }
+  if (d > 600) { reveal('tagline'); }
+}
+
+// ═══ TAGLINE HOVER ═══
+
+let taglineHovered = false;
+
+function setupTaglineHover() {
+  const tagline = document.getElementById('tagline');
+  if (!tagline) return;
+
+  tagline.style.pointerEvents = 'auto';
+  tagline.style.cursor = 'default';
+
+  tagline.addEventListener('mouseenter', () => {
+    taglineHovered = true;
+    const { W, H } = state;
+    showConstellation(manifestoDef, W/2, H/2);
+  });
+
+  tagline.addEventListener('mouseleave', () => {
+    taglineHovered = false;
+    // Only hide if it's the manifesto
+    if (constellationState.active?.def.id === 'manifesto') {
+      hideConstellation();
+    }
+  });
 }
 
 // ═══ OVERLAY MESSAGE ═══
@@ -65,7 +94,8 @@ export function startHintTimer() {
 
 function hideHint() {
   if (hintEl && hintEl.classList.contains('revealed')) {
-    hintEl.classList.remove('hidden');
+    hintEl.classList.add('hidden');
+    hintEl.classList.remove('revealed');
     hintEl.style.animation = '';
   }
   clearTimeout(hintTimer);
@@ -75,6 +105,8 @@ function hideHint() {
 
 export function setupInput() {
   const { mouse, interaction } = state;
+
+  setupTaglineHover();
 
   document.addEventListener('mousemove', (e) => {
     if (mouse.active) {
