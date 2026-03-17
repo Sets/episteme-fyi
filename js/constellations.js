@@ -67,8 +67,8 @@ export const CONSTELLATIONS = [
 // ═══ BOX DIMENSIONS ═══
 const BOX_W      = 108;
 const BOX_H      = 38;
-const HERO_BOX_W = 200;
-const HERO_BOX_H = 52;
+const HERO_BOX_W = 240;
+const HERO_BOX_H = 58;
 const MARGIN     = 14;
 const BORDER_R   = 4;
 

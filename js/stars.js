@@ -13,24 +13,21 @@ export const stars = [];
 const INTERACTIVE = [
   {
     constellationId: 'daas',
-    relX: 0.22, relY: 0.18,
+    relX: 0.28, relY: 0.20,      // top-left-center
     starName: 'Sirius',
-    starCoords: 'α CMa · RA 101.287° · −16.716°',
-    nameOffset: { x: 0, y: -28 },   // above the star
+    starCoords: 'α CMa · −16.716°',
   },
   {
     constellationId: 'ecommerce',
-    relX: 0.78, relY: 0.24,
+    relX: 0.72, relY: 0.20,      // top-right-center
     starName: 'Algol',
-    starCoords: 'β Per · RA 47.042° · +40.956°',
-    nameOffset: { x: 0, y: -28 },
+    starCoords: 'β Per · +40.956°',
   },
   {
     constellationId: 'alternet',
-    relX: 0.50, relY: 0.12,
+    relX: 0.50, relY: 0.80,      // bottom-center
     starName: 'Antares',
-    starCoords: 'α Sco · RA 247.351° · −26.432°',
-    nameOffset: { x: 0, y: -28 },
+    starCoords: 'α Sco · −26.432°',
   },
 ];
 
