@@ -11,9 +11,27 @@ export const stars = [];
 
 // Two designated "interactive" stars — one per constellation
 const INTERACTIVE = [
-  { constellationId: 'daas',       relX: 0.22, relY: 0.18 },
-  { constellationId: 'ecommerce',  relX: 0.78, relY: 0.24 },
-  { constellationId: 'alternet',   relX: 0.50, relY: 0.12 },
+  {
+    constellationId: 'daas',
+    relX: 0.22, relY: 0.18,
+    starName: 'Sirius',
+    starCoords: 'α CMa · RA 101.287° · −16.716°',
+    nameOffset: { x: 0, y: -28 },   // above the star
+  },
+  {
+    constellationId: 'ecommerce',
+    relX: 0.78, relY: 0.24,
+    starName: 'Algol',
+    starCoords: 'β Per · RA 47.042° · +40.956°',
+    nameOffset: { x: 0, y: -28 },
+  },
+  {
+    constellationId: 'alternet',
+    relX: 0.50, relY: 0.12,
+    starName: 'Antares',
+    starCoords: 'α Sco · RA 247.351° · −26.432°',
+    nameOffset: { x: 0, y: -28 },
+  },
 ];
 
 export function initStars() {
@@ -42,7 +60,8 @@ export function initStars() {
   }
 
   // Interactive constellation stars — always tier 3, prominent
-  INTERACTIVE.forEach(({ constellationId, relX, relY }) => {
+  INTERACTIVE.forEach((interactiveDef) => {
+    const { constellationId, relX, relY } = interactiveDef;
     const def = CONSTELLATIONS.find(c => c.id === constellationId);
     stars.push({
       x: relX, y: relY,
@@ -57,6 +76,9 @@ export function initStars() {
       constellationDef: def,
       hovered: false,
       pulsePhase: Math.random()*Math.PI*2,
+      starName: interactiveDef.starName,
+      starCoords: interactiveDef.starCoords,
+      nameOffset: interactiveDef.nameOffset,
     });
   });
 }
