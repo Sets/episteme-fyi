@@ -33,6 +33,20 @@ export const CONSTELLATIONS = [
     ],
   },
   {
+    id: 'alternet',
+    title: 'ALTERNET',
+    nodes: [
+      { label: ['ideas are nothing.', 'execution — everything.'], angle: 0,   dist: 0.18, hero: true },
+      { label: ['consensus kills', 'real inquiry'],               angle: 48,  dist: 0.26 },
+      { label: ['first reply wins —', 'not debate'],              angle: 96,  dist: 0.22 },
+      { label: ['aligned AI', 'can't go there'],                 angle: 144, dist: 0.25 },
+      { label: ['ego over', 'epistemics'],                        angle: 192, dist: 0.22 },
+      { label: ['academia', 'gatekeeps truth'],                   angle: 240, dist: 0.26 },
+      { label: ['3 layers:', 'thought → claim'],                  angle: 288, dist: 0.22 },
+      { label: ['blind processing,', 'no hierarchy'],             angle: 336, dist: 0.24 },
+    ],
+  },
+  {
     id: 'manifesto',
     title: 'EPISTEME',
     manifesto: true,
@@ -51,10 +65,12 @@ export const CONSTELLATIONS = [
 ];
 
 // ═══ BOX DIMENSIONS ═══
-const BOX_W  = 108;
-const BOX_H  = 38;
-const MARGIN = 14;
-const BORDER_R = 4;
+const BOX_W      = 108;
+const BOX_H      = 38;
+const HERO_BOX_W = 200;
+const HERO_BOX_H = 52;
+const MARGIN     = 14;
+const BORDER_R   = 4;
 
 // ═══ ACTIVE STATE ═══
 
@@ -79,14 +95,16 @@ export function hideConstellation() {
 
 // ═══ HELPERS ═══
 
-function clampBox(cx, cy, angle, rawDist) {
+function clampBox(cx, cy, angle, rawDist, hero) {
   const { W, H } = state;
   const rad    = (angle * Math.PI) / 180;
   const spread = Math.min(W, H) * 0.78;
+  const bw = hero ? HERO_BOX_W : BOX_W;
+  const bh = hero ? HERO_BOX_H : BOX_H;
   let bx = cx + Math.cos(rad) * spread * rawDist;
   let by = cy + Math.sin(rad) * spread * rawDist;
-  bx = Math.max(MARGIN + BOX_W/2, Math.min(W - MARGIN - BOX_W/2, bx));
-  by = Math.max(MARGIN + BOX_H/2, Math.min(H - MARGIN - BOX_H/2, by));
+  bx = Math.max(MARGIN + bw/2, Math.min(W - MARGIN - bw/2, bx));
+  by = Math.max(MARGIN + bh/2, Math.min(H - MARGIN - bh/2, by));
   return { bx, by };
 }
 
@@ -102,9 +120,10 @@ function boxEdgePoint(bx, by, fromX, fromY) {
 // ═══ BORDER LIGHT SWEEP ═══
 // Draws a comet-like light orb that travels around the box perimeter
 
-function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha) {
-  const hw = BOX_W/2, hh = BOX_H/2;
-  const perimeter = 2 * (BOX_W + BOX_H);
+function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha, bw, bh) {
+  bw = bw || BOX_W; bh = bh || BOX_H;
+  const hw = bw/2, hh = bh/2;
+  const perimeter = 2 * (bw + bh);
 
   // Each node gets a slightly different phase offset via bx+by
   const phase   = ((t * 0.55 + (bx + by) * 0.004) % 1 + 1) % 1;
@@ -114,7 +133,7 @@ function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha) {
   // Returns {x, y, tangentAngle} at distance d along the border
   function perimPoint(d) {
     d = ((d % perimeter) + perimeter) % perimeter;
-    const top = BOX_W, right = BOX_H, bottom = BOX_W, left = BOX_H;
+    const top = bw, right = bh, bottom = bw, left = bh;
     let x, y, tx, ty;
     if (d < top) {
       x = bx - hw + d; y = by - hh; tx = 1; ty = 0;
@@ -170,7 +189,7 @@ function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha) {
 
 // ═══ SHARED BOX DRAW ═══
 
-function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha) {
+function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, bh) {
   // Mercury/liquid metal effect — animated shimmer gradient
   const speed    = t * 0.38;
   const waveX    = Math.sin(speed * 1.1 + animBx * 0.02) * 0.4 + 0.5;
@@ -211,7 +230,7 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha) {
 
   // Surface sheen — thin bright line that slides across
   const sheenX = ((speed * 0.22) % 1.6) - 0.3;
-  const sx1 = animBx - hw + sheenX * (BOX_W + 20) - 10;
+  const sx1 = animBx - hw + sheenX * (bw + 20) - 10;
   const sx2 = sx1 + 18;
   const sheenGrad = ctx.createLinearGradient(sx1, animBy-hh, sx2, animBy+hh);
   sheenGrad.addColorStop(0,   `rgba(200,180,255,0)`);
@@ -228,8 +247,10 @@ function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha) {
   ctx.restore();
 }
 
-function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
-  const hw = BOX_W/2, hh = BOX_H/2, r = BORDER_R;
+function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime, hero) {
+  const bw = hero ? HERO_BOX_W : BOX_W;
+  const bh = hero ? HERO_BOX_H : BOX_H;
+  const hw = bw/2, hh = bh/2, r = BORDER_R;
   const boxAlpha = Math.max(0, (np - 0.25) / 0.75);
   if (boxAlpha <= 0) return;
 
@@ -237,7 +258,7 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
 
   // Background
   if (isManifesto) {
-    drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha);
+    drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha, bw, bh);
   } else {
     ctx.fillStyle = `rgba(10,8,18,${0.82*boxAlpha})`;
     ctx.beginPath();
@@ -274,19 +295,25 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
 
   // ── Border light sweep (only when fully visible) ──
   if (boxAlpha > 0.4) {
-    drawBorderLight(ctx, animBx, animBy, t, isManifesto, boxAlpha);
+    drawBorderLight(ctx, animBx, animBy, t, isManifesto, boxAlpha, bw, bh);
   }
 
   // Label text
-  const lineH = 11;
+  const lineH = hero ? 13 : 11;
+  const fontSize = hero ? '10px' : '9px';
   const totalH = node.label.length * lineH;
-  ctx.fillStyle = isManifesto
-    ? `rgba(240,220,160,${0.9*boxAlpha})`
-    : `rgba(200,184,232,${0.85*boxAlpha})`;
-  ctx.font = `9px 'Space Mono', monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   node.label.forEach((line, li) => {
+    const isFirstLine = li === 0 && hero;
+    ctx.font = isFirstLine
+      ? `700 11px 'Space Mono', monospace`
+      : `${fontSize} 'Space Mono', monospace`;
+    ctx.fillStyle = isFirstLine
+      ? `rgba(255,240,180,${0.95*boxAlpha})`
+      : isManifesto
+        ? `rgba(240,220,160,${0.9*boxAlpha})`
+        : `rgba(200,184,232,${0.85*boxAlpha})`;
     ctx.fillText(line, animBx, animBy - totalH/2 + lineH*0.5 + li*lineH);
   });
 }
@@ -356,8 +383,8 @@ export function drawConstellation(time) {
   const isManifesto = !!a.def.manifesto;
 
   const nodes = a.def.nodes.map(n => {
-    const { bx, by } = clampBox(cx, cy, n.angle, n.dist);
-    return { bx, by, label: n.label, revealAt: n.angle / 360 };
+    const { bx, by } = clampBox(cx, cy, n.angle, n.dist, !!n.hero);
+    return { bx, by, label: n.label, revealAt: n.angle / 360, hero: !!n.hero };
   });
 
   ctx.save();
@@ -395,7 +422,7 @@ export function drawConstellation(time) {
       : `rgba(212,168,83,${0.65*np})`;
     ctx.beginPath(); ctx.arc(ex,ey,2.2,0,Math.PI*2); ctx.fill();
 
-    drawBox(ctx, animBx, animBy, node, np, isManifesto, time);
+    drawBox(ctx, animBx, animBy, node, np, isManifesto, time, node.hero);
   });
 
   // ── Title ──

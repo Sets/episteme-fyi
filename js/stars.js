@@ -13,6 +13,7 @@ export const stars = [];
 const INTERACTIVE = [
   { constellationId: 'daas',       relX: 0.22, relY: 0.18 },
   { constellationId: 'ecommerce',  relX: 0.78, relY: 0.24 },
+  { constellationId: 'alternet',   relX: 0.50, relY: 0.12 },
 ];
 
 export function initStars() {
