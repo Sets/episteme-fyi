@@ -170,18 +170,80 @@ function drawBorderLight(ctx, bx, by, t, isManifesto, boxAlpha) {
 
 // ═══ SHARED BOX DRAW ═══
 
+function drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha) {
+  // Mercury/liquid metal effect — animated shimmer gradient
+  const speed    = t * 0.38;
+  const waveX    = Math.sin(speed * 1.1 + animBx * 0.02) * 0.4 + 0.5;
+  const waveY    = Math.cos(speed * 0.7 + animBy * 0.015) * 0.35 + 0.5;
+  const waveX2   = Math.sin(speed * 0.5 + animBx * 0.03 + 1.4) * 0.3 + 0.5;
+
+  // Base fill — very dark violet
+  ctx.fillStyle = `rgba(6,4,18,${0.92*boxAlpha})`;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.fill();
+
+  // Shimmer blob 1 — slow drift
+  const g1 = ctx.createRadialGradient(
+    animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  0,
+    animBx - hw + waveX * BOX_W,  animBy - hh + waveY * BOX_H,  BOX_W * 0.55
+  );
+  g1.addColorStop(0,   `rgba(80,50,160,${0.38*boxAlpha})`);
+  g1.addColorStop(0.5, `rgba(40,20,90,${0.18*boxAlpha})`);
+  g1.addColorStop(1,   `rgba(0,0,0,0)`);
+  ctx.fillStyle = g1;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.fill();
+
+  // Shimmer blob 2 — faster, cooler
+  const g2 = ctx.createRadialGradient(
+    animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, 0,
+    animBx - hw + waveX2 * BOX_W, animBy + hh * 0.3, BOX_W * 0.45
+  );
+  g2.addColorStop(0,   `rgba(140,120,220,${0.22*boxAlpha})`);
+  g2.addColorStop(0.6, `rgba(60,40,120,${0.10*boxAlpha})`);
+  g2.addColorStop(1,   `rgba(0,0,0,0)`);
+  ctx.fillStyle = g2;
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.fill();
+
+  // Surface sheen — thin bright line that slides across
+  const sheenX = ((speed * 0.22) % 1.6) - 0.3;
+  const sx1 = animBx - hw + sheenX * (BOX_W + 20) - 10;
+  const sx2 = sx1 + 18;
+  const sheenGrad = ctx.createLinearGradient(sx1, animBy-hh, sx2, animBy+hh);
+  sheenGrad.addColorStop(0,   `rgba(200,180,255,0)`);
+  sheenGrad.addColorStop(0.4, `rgba(200,180,255,${0.12*boxAlpha})`);
+  sheenGrad.addColorStop(0.6, `rgba(220,210,255,${0.18*boxAlpha})`);
+  sheenGrad.addColorStop(1,   `rgba(200,180,255,0)`);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+  ctx.clip();
+  ctx.fillStyle = sheenGrad;
+  ctx.fillRect(sx1, animBy-hh, sx2-sx1, BOX_H);
+  ctx.restore();
+}
+
 function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
   const hw = BOX_W/2, hh = BOX_H/2, r = BORDER_R;
   const boxAlpha = Math.max(0, (np - 0.25) / 0.75);
   if (boxAlpha <= 0) return;
 
+  const t = globalTime * 0.001;
+
   // Background
-  ctx.fillStyle = isManifesto
-    ? `rgba(8,6,22,${0.88*boxAlpha})`
-    : `rgba(10,8,18,${0.82*boxAlpha})`;
-  ctx.beginPath();
-  ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
-  ctx.fill();
+  if (isManifesto) {
+    drawMercuryBackground(ctx, animBx, animBy, hw, hh, r, t, boxAlpha);
+  } else {
+    ctx.fillStyle = `rgba(10,8,18,${0.82*boxAlpha})`;
+    ctx.beginPath();
+    ctx.roundRect(animBx-hw, animBy-hh, BOX_W, BOX_H, r);
+    ctx.fill();
+  }
 
   // Base border (dim)
   ctx.strokeStyle = isManifesto
@@ -212,7 +274,6 @@ function drawBox(ctx, animBx, animBy, node, np, isManifesto, globalTime) {
 
   // ── Border light sweep (only when fully visible) ──
   if (boxAlpha > 0.4) {
-    const t = globalTime * 0.001;
     drawBorderLight(ctx, animBx, animBy, t, isManifesto, boxAlpha);
   }
 
