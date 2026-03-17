@@ -7,6 +7,7 @@ import { state } from './state.js';
 import { lerpColor } from './utils.js';
 import { drawConnections, updateWarpStreaks, drawWarpStreaks } from './effects.js';
 import { drawStars } from './stars.js';
+import { drawConstellation } from './constellations.js';
 
 // ═══ CUSTOM CURSOR ═══
 
@@ -41,11 +42,11 @@ export function render(time) {
   drawConnections();
   updateWarpStreaks();
   drawWarpStreaks();
+  drawConstellation(time);   // ← constellation overlay
 
   for (const p of particles) {
     const c = lerpColor(p.colorT);
     const bright = p.target ? 0.82 : 0.60;
-
     if (p.target) {
       ctx.fillStyle=`rgba(${c.r},${c.g},${c.b},0.10)`;
       ctx.fillRect(p.x-3,p.y-3,6,6);

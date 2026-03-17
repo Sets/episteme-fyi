@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════════
 
 import { state } from './state.js';
+import { checkStarHover } from './stars.js';
 
 // ═══ REVEAL SYSTEM ═══
 
@@ -17,7 +18,7 @@ function checkReveals() {
   const d = state.interaction.mouseDist;
   if (d > 300)  reveal('hud-tl');
   if (d > 420)  { reveal('hud-tr'); reveal('hud-bl'); reveal('hud-br'); }
-  if (d > 600)  { reveal('tagline'); reveal('truth-link'); }
+  if (d > 600)  { reveal('tagline'); }
 }
 
 // ═══ OVERLAY MESSAGE ═══
@@ -41,7 +42,6 @@ export function showMsg(text) {
 // ═══ EASTER EGGS ═══
 
 function triggerDoxa() {
-  // Chaos burst — scatter all particles
   for (const p of state.particles) {
     p.vx += (Math.random()-0.5)*14;
     p.vy += (Math.random()-0.5)*14;
@@ -49,18 +49,10 @@ function triggerDoxa() {
   showMsg('δόξα — mere opinion');
 }
 
-function triggerAletheia() {
-  showMsg('ἀλήθεια — truth unveiled');
-}
-
-function triggerEpisteme() {
-  showMsg('ἐπιστήμη — true knowledge');
-}
-
 // ═══ IDLE HINT ═══
 
-let hintTimer  = null;
-let hintEl     = null;
+let hintTimer = null;
+let hintEl    = null;
 
 export function startHintTimer() {
   hintEl = document.getElementById('hint');
@@ -73,8 +65,7 @@ export function startHintTimer() {
 
 function hideHint() {
   if (hintEl && hintEl.classList.contains('revealed')) {
-    hintEl.classList.remove('revealed');
-    hintEl.classList.add('hidden');
+    hintEl.classList.remove('hidden');
     hintEl.style.animation = '';
   }
   clearTimeout(hintTimer);
@@ -90,15 +81,15 @@ export function setupInput() {
       const dx=e.clientX-mouse.x, dy=e.clientY-mouse.y;
       interaction.mouseDist += Math.hypot(dx,dy);
     }
-    interaction.lastMove = Date.now();
+    interaction.lastMove=Date.now();
     mouse.x=e.clientX; mouse.y=e.clientY; mouse.active=true;
+    checkStarHover(e.clientX, e.clientY);
     hideHint();
     checkReveals();
   });
 
   document.addEventListener('click', () => {
-    interaction.clicks++;
-    checkReveals();
+    interaction.clicks++; checkReveals();
   });
 
   state.canvas.addEventListener('touchmove', (e) => {
@@ -108,12 +99,14 @@ export function setupInput() {
     interaction.mouseDist += Math.hypot(dx,dy);
     interaction.lastMove=Date.now();
     mouse.x=t.clientX; mouse.y=t.clientY; mouse.active=true;
+    checkStarHover(t.clientX, t.clientY);
     hideHint(); checkReveals();
   }, { passive: false });
 
   state.canvas.addEventListener('touchstart', (e) => {
     const t=e.touches[0];
     mouse.x=t.clientX; mouse.y=t.clientY; mouse.active=true;
+    checkStarHover(t.clientX, t.clientY);
     interaction.clicks++; checkReveals();
   });
 
@@ -123,11 +116,9 @@ export function setupInput() {
 
   document.addEventListener('keydown', (e) => {
     interaction.keyBuf += e.key;
-    if (interaction.keyBuf.length > 24) {
-      interaction.keyBuf = interaction.keyBuf.slice(-24);
-    }
+    if (interaction.keyBuf.length > 24) interaction.keyBuf=interaction.keyBuf.slice(-24);
     if (interaction.keyBuf.includes('doxa'))     { interaction.keyBuf=''; triggerDoxa(); }
-    if (interaction.keyBuf.includes('aletheia')) { interaction.keyBuf=''; triggerAletheia(); }
-    if (interaction.keyBuf.includes('episteme')) { interaction.keyBuf=''; triggerEpisteme(); }
+    if (interaction.keyBuf.includes('aletheia')) { interaction.keyBuf=''; showMsg('ἀλήθεια — truth unveiled'); }
+    if (interaction.keyBuf.includes('episteme')) { interaction.keyBuf=''; showMsg('ἐπιστήμη — true knowledge'); }
   });
 }
