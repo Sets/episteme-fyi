@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDGY3FF76V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZDGY3FF76V');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>episteme</title>
+  <meta name="description" content="episteme — knowledge. unveiled. real.">
+  <meta property="og:title" content="episteme">
+  <meta property="og:description" content="knowledge · unveiled · real">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://episteme.fyi">
+  <meta name="theme-color" content="#07060A">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='11' fill='none' stroke='%23D4A853' stroke-width='0.8'/><circle cx='16' cy='16' r='5' fill='none' stroke='%23C8B8E8' stroke-width='0.5'/><line x1='16' y1='5' x2='16' y2='11' stroke='%23D4A853' stroke-width='0.6'/><line x1='16' y1='21' x2='16' y2='27' stroke='%23D4A853' stroke-width='0.6'/><line x1='5' y1='16' x2='11' y2='16' stroke='%23D4A853' stroke-width='0.6'/><line x1='21' y1='16' x2='27' y2='16' stroke='%23D4A853' stroke-width='0.6'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+
+    :root {
+      --gold: #D4A853;
+      --gold-dim: #9A7A3A;
+      --gold-light: #F0CC88;
+      --violet: #C8B8E8;
+      --violet-dim: #8878A8;
+      --bg: #07060A;
+      --mono: 'Space Mono', 'SF Mono', 'Fira Code', monospace;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--mono);
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+
+    /* ═══ LAYERS ═══ */
+
+    #canvas {
+      position: fixed; inset: 0; z-index: 1; cursor: none;
+    }
+
+    #overlay {
+      position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    }
+
+    #overlay a, #overlay nav { pointer-events: auto; }
+
+    #vignette {
+      position: fixed; inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 20%,
+        rgba(7,6,10,0.35) 55%,
+        rgba(7,6,10,0.82) 100%
+      );
+      pointer-events: none;
+    }
+
+    /* ═══ SCANLINE ═══ */
+
+    #scanline {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 20;
+      background: repeating-linear-gradient(
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.018) 2px, rgba(0,0,0,0.018) 4px
+      );
+    }
+
+    #scanline::after {
+      content: '';
+      position: absolute; left: 0; width: 100%; height: 10px;
+      background: linear-gradient(transparent, rgba(212,168,83,0.008), transparent);
+      animation: scanMove 14s linear infinite;
+    }
+
+    @keyframes scanMove {
+      0%   { top: -10px; }
+      100% { top: 100%; }
+    }
+
+    /* ═══ BOOT SCREEN ═══ */
+
+    #boot-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 50; opacity: 1;
+      transition: opacity 1.2s ease;
+    }
+
+    #boot-screen.fade-out { opacity: 0; }
+
+    #boot-inner { min-width: 360px; max-width: 90vw; }
+
+    #boot-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gold);
+      opacity: 0.65;
+      line-height: 2.4;
+    }
+
+    .boot-line { white-space: nowrap; overflow: hidden; }
+
+    #boot-cursor {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gold);
+      opacity: 0.65;
+      animation: cursorBlink 0.9s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 0.65; }
+      50%       { opacity: 0; }
+    }
+
+    /* ═══ HUD CORNERS ═══ */
+
+    .hud {
+      position: fixed;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    #hud-tl { top: 22px; left: 24px; color: var(--gold); opacity: 0.3; }
+    #hud-tr { top: 22px; right: 24px; color: var(--violet-dim); opacity: 0.22; text-align: right; }
+    #hud-bl { bottom: 22px; left: 24px; color: var(--violet-dim); opacity: 0.22; }
+    #hud-br { bottom: 22px; right: 24px; color: var(--gold); opacity: 0.25; text-align: right; }
+
+    /* ═══ TAGLINE ═══ */
+
+    #tagline {
+      position: fixed;
+      top: 57%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      opacity: 0.45;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ═══ TRUTH LINK ═══ */
+
+    #truth-link {
+      position: fixed;
+      bottom: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--violet-dim);
+      opacity: 0;
+      white-space: nowrap;
+      text-decoration: none;
+      pointer-events: none;
+      z-index: 10;
+      transition: color 0.4s ease;
+    }
+
+    #truth-link:hover { color: var(--violet); }
+
+    #truth-link::before {
+      content: '→ ';
+      color: var(--gold-dim);
+    }
+
+    /* ═══ HIDDEN / REVEALED ═══ */
+
+    .hidden {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transition: opacity 2.5s ease, visibility 0s 2.5s;
+      pointer-events: none !important;
+    }
+
+    .revealed {
+      visibility: visible !important;
+      transition: opacity 2.5s ease, visibility 0s;
+    }
+
+    #hud-tl.revealed  { opacity: 0.3; }
+    #hud-tr.revealed  { opacity: 0.22; }
+    #hud-bl.revealed  { opacity: 0.22; }
+    #hud-br.revealed  { opacity: 0.25; }
+    #tagline.revealed { opacity: 0.45; }
+
+    #truth-link.revealed {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible !important;
+      transition: opacity 2.5s ease 0.5s;
+    }
+
+    /* ═══ HINT ═══ */
+
+    #hint {
+      position: fixed;
+      bottom: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 7px;
+      color: var(--gold-dim);
+      opacity: 0;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0; }
+      40%, 60%  { opacity: 0.28; }
+    }
+
+    /* ═══ OVERLAY MESSAGE ═══ */
+
+    .overlay-msg {
+      position: fixed;
+      top: 62%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 14px;
+      letter-spacing: 7px;
+      color: var(--gold-light);
+      opacity: 0;
+      transition: opacity 1.8s ease;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .overlay-msg.visible { opacity: 0.65; }
+
+    /* ═══ RESPONSIVE ═══ */
+
+    @media (max-width: 768px) {
+      #tagline { font-size: 11px; letter-spacing: 3px; }
+      .hud { font-size: 8px; letter-spacing: 1.5px; }
+      #hint { font-size: 8px; letter-spacing: 4px; }
+      #boot-text { font-size: 10px; }
+      #truth-link { font-size: 8px; letter-spacing: 3px; }
+    }
+
+    @media (max-width: 480px) {
+      #hud-tr, #hud-bl { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas" role="img" aria-label="Episteme — particle visualization"></canvas>
+
+  <div id="boot-screen">
+    <div id="boot-inner">
+      <div id="boot-text"></div>
+      <span id="boot-cursor">_</span>
+    </div>
+  </div>
+
+  <div id="overlay">
+    <h1 class="sr-only">episteme — knowledge. unveiled. real.</h1>
+
+    <div id="vignette"></div>
+
+    <div id="hud-tl" class="hud hidden">ἐπιστήμη</div>
+    <div id="hud-tr" class="hud hidden">Platō · Republic · 477a</div>
+    <div id="hud-bl" class="hud hidden">0x74 0x72 0x75 0x74 0x68</div>
+    <div id="hud-br" class="hud hidden">signal / noise → ∞</div>
+
+    <div id="tagline" class="hidden">knowledge · unveiled</div>
+
+    <a id="truth-link" class="hidden" href="https://truth.episteme.fyi">truth.episteme.fyi</a>
+
+    <div id="hint" class="hidden">explore · discover</div>
+  </div>
+
+  <div id="scanline"></div>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // ══════════════════════════════════════════════
+    // CONFIG
+    // ══════════════════════════════════════════════
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+    const CONFIG = {
+      particleCount:    isMobile ? 550 : 1300,
+      textParticleRatio: 0.52,
+      connectionDist:   isMobile ? 65 : 95,
+      mouseRadius:      isMobile ? 110 : 190,
+      flowScale:        0.0022,
+      flowSpeed:        0.00022,
+      particleAccel:    0.16,
+      textAttraction:   0.042,
+      mouseForce:       3.8,
+      damping:          0.952,
+      trailAlpha:       0.075,
+      maxConnections:   isMobile ? 700 : 2000,
+    };
+
+    const GRID_SIZE = CONFIG.connectionDist;
+    const WARP_MAX  = isMobile ? 7 : 16;
+
+    // episteme palette
+    const WARM = { r: 212, g: 168, b: 83  };  // amber gold
+    const COOL = { r: 200, g: 184, b: 232 };  // cold violet-white
+
+    // ══════════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════════
+
+    const state = {
+      canvas: null, ctx: null, dpr: 1, W: 0, H: 0,
+      particles: [], textTargets: [], grid: {},
+      mouse: { x: -9999, y: -9999, sx: -9999, sy: -9999, active: false },
+      warpStreaks: [],
+      booted: false,
+      phase: 'doxa',   // doxa → episteme
+      phaseTimer: 0,
+      interaction: {
+        mouseDist: 0, clicks: 0, lastMove: 0,
+        revealed: new Set(), keyBuf: '',
+      },
+    };
+
+    // ══════════════════════════════════════════════
+    // UTILITIES
+    // ══════════════════════════════════════════════
+
+    function lerpColor(t) {
+      t = Math.max(0, Math.min(1, t));
+      return {
+        r: Math.round(WARM.r + (COOL.r - WARM.r) * t),
+        g: Math.round(WARM.g + (COOL.g - WARM.g) * t),
+        b: Math.round(WARM.b + (COOL.b - WARM.b) * t),
+      };
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ══════════════════════════════════════════════
+    // SIMPLEX NOISE
+    // ══════════════════════════════════════════════
+
+    class SimplexNoise {
+      constructor() {
+        this.grad3 = [
+          [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+          [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+          [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+        ];
+        const p = [];
+        for (let i = 0; i < 256; i++) p[i] = i;
+        for (let i = 255; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [p[i], p[j]] = [p[j], p[i]];
+        }
+        this.perm = new Array(512);
+        this.pm12 = new Array(512);
+        for (let i = 0; i < 512; i++) {
+          this.perm[i] = p[i & 255];
+          this.pm12[i] = this.perm[i] % 12;
+        }
+      }
+      noise3D(xin, yin, zin) {
+        const { grad3: g, perm: p, pm12 } = this;
+        const F3 = 1/3, G3 = 1/6;
+        const s = (xin+yin+zin)*F3;
+        const i = Math.floor(xin+s), j = Math.floor(yin+s), k = Math.floor(zin+s);
+        const t = (i+j+k)*G3;
+        const x0=xin-(i-t), y0=yin-(j-t), z0=zin-(k-t);
+        let i1,j1,k1,i2,j2,k2;
+        if (x0>=y0) {
+          if (y0>=z0)      { i1=1;j1=0;k1=0;i2=1;j2=1;k2=0; }
+          else if (x0>=z0) { i1=1;j1=0;k1=0;i2=1;j2=0;k2=1; }
+          else             { i1=0;j1=0;k1=1;i2=1;j2=0;k2=1; }
+        } else {
+          if (y0<z0)       { i1=0;j1=0;k1=1;i2=0;j2=1;k2=1; }
+          else if (x0<z0)  { i1=0;j1=1;k1=0;i2=0;j2=1;k2=1; }
+          else             { i1=0;j1=1;k1=0;i2=1;j2=1;k2=0; }
+        }
+        const x1=x0-i1+G3, y1=y0-j1+G3, z1=z0-k1+G3;
+        const x2=x0-i2+2*G3, y2=y0-j2+2*G3, z2=z0-k2+2*G3;
+        const x3=x0-1+0.5, y3=y0-1+0.5, z3=z0-1+0.5;
+        const ii=i&255, jj=j&255, kk=k&255;
+        let n0=0,n1=0,n2=0,n3=0;
+        let t0=0.6-x0*x0-y0*y0-z0*z0;
+        if(t0>0){const gi=pm12[ii+p[jj+p[kk]]];t0*=t0;n0=t0*t0*(g[gi][0]*x0+g[gi][1]*y0+g[gi][2]*z0);}
+        let t1=0.6-x1*x1-y1*y1-z1*z1;
+        if(t1>0){const gi=pm12[ii+i1+p[jj+j1+p[kk+k1]]];t1*=t1;n1=t1*t1*(g[gi][0]*x1+g[gi][1]*y1+g[gi][2]*z1);}
+        let t2=0.6-x2*x2-y2*y2-z2*z2;
+        if(t2>0){const gi=pm12[ii+i2+p[jj+j2+p[kk+k2]]];t2*=t2;n2=t2*t2*(g[gi][0]*x2+g[gi][1]*y2+g[gi][2]*z2);}
+        let t3=0.6-x3*x3-y3*y3-z3*z3;
+        if(t3>0){const gi=pm12[ii+1+p[jj+1+p[kk+1]]];t3*=t3;n3=t3*t3*(g[gi][0]*x3+g[gi][1]*y3+g[gi][2]*z3);}
+        return 32*(n0+n1+n2+n3);
+      }
+    }
+
+    const noise = new SimplexNoise();
+
+    // ══════════════════════════════════════════════
+    // STARS
+    // ══════════════════════════════════════════════
+
+    const STAR_COUNT = isMobile ? 130 : 300;
+    const stars = [];
+
+    function initStars() {
+      stars.length = 0;
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const roll = Math.random();
+        const tier = roll < 0.70 ? 0 : roll < 0.92 ? 1 : roll < 0.98 ? 2 : 3;
+        const size = [0.4+Math.random()*0.5, 0.7+Math.random()*0.7, 1.1+Math.random()*0.9, 1.8+Math.random()*1.1][tier];
+        const baseAlpha = [0.06+Math.random()*0.12, 0.16+Math.random()*0.18, 0.28+Math.random()*0.22, 0.45+Math.random()*0.28][tier];
+        // cooler, more violet star colors for episteme
+        const cr = Math.random();
+        let r,g,b;
+        if (cr < 0.2) { r=170+Math.floor(Math.random()*40); g=180+Math.floor(Math.random()*40); b=220+Math.floor(Math.random()*35); }
+        else if (cr < 0.35) { r=210+Math.floor(Math.random()*35); g=185+Math.floor(Math.random()*35); b=155+Math.floor(Math.random()*35); }
+        else { r=190+Math.floor(Math.random()*55); g=185+Math.floor(Math.random()*50); b=200+Math.floor(Math.random()*50); }
+        stars.push({
+          x: Math.random(), y: Math.random(), size, baseAlpha,
+          twinkleSpeed: tier <= 1 ? 0.3+Math.random()*1.2 : 0.7+Math.random()*2.8,
+          twinklePhase: Math.random()*Math.PI*2,
+          twinkleDepth: 0.25+Math.random()*0.55,
+          r, g, b, tier,
+        });
+      }
+    }
+
+    function drawStars(time) {
+      const { ctx, W, H } = state;
+      const t = time * 0.001;
+      for (const s of stars) {
+        const wave = Math.sin(t*s.twinkleSpeed+s.twinklePhase);
+        const wave2 = Math.sin(t*s.twinkleSpeed*2.37+s.twinklePhase*1.7)*0.3;
+        const flicker = (wave+wave2)*0.5;
+        const alpha = s.baseAlpha*(1+flicker*s.twinkleDepth);
+        if (alpha < 0.01) continue;
+        const px=s.x*W, py=s.y*H, sz=s.size;
+        if (s.tier >= 2 && alpha > 0.25) {
+          const gs=sz*3, ga=alpha*0.07;
+          ctx.fillStyle=`rgba(${s.r},${s.g},${s.b},${ga})`;
+          ctx.fillRect(px-gs/2,py-gs/2,gs,gs);
+        }
+        ctx.fillStyle=`rgba(${s.r},${s.g},${s.b},${Math.min(alpha,0.82)})`;
+        ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // WARP STREAKS
+    // ══════════════════════════════════════════════
+
+    function createWarpStreak() {
+      const { W, H } = state;
+      const dir = Math.random() > 0.5 ? 1 : -1;
+      const bandH = H * 0.10;
+      return {
+        x: dir>0 ? -(50+Math.random()*180) : W+50+Math.random()*180,
+        y: H/2+(Math.random()-0.5)*bandH,
+        speed: (3+Math.random()*9)*dir,
+        len: 35+Math.random()*140,
+        alpha: 0.04+Math.random()*0.18,
+        colorT: 0.5+Math.random()*0.5,  // lean violet
+        width: 0.2+Math.random()*0.6,
+      };
+    }
+
+    function updateWarpStreaks() {
+      const { W } = state;
+      if (Math.random() < 0.09 && state.warpStreaks.length < WARP_MAX) {
+        state.warpStreaks.push(createWarpStreak());
+      }
+      for (let i = state.warpStreaks.length-1; i >= 0; i--) {
+        const s = state.warpStreaks[i];
+        s.x += s.speed;
+        if ((s.speed>0&&s.x>W+300)||(s.speed<0&&s.x<-300)) {
+          state.warpStreaks.splice(i,1);
+        }
+      }
+    }
+
+    function drawWarpStreaks() {
+      const { ctx } = state;
+      for (const s of state.warpStreaks) {
+        const c = lerpColor(s.colorT);
+        const tailX = s.x-s.len*Math.sign(s.speed);
+        const grad = ctx.createLinearGradient(tailX,s.y,s.x,s.y);
+        grad.addColorStop(0,`rgba(${c.r},${c.g},${c.b},0)`);
+        grad.addColorStop(0.7,`rgba(${c.r},${c.g},${c.b},${s.alpha*0.4})`);
+        grad.addColorStop(1,`rgba(${c.r},${c.g},${c.b},${s.alpha})`);
+        ctx.strokeStyle=grad; ctx.lineWidth=s.width;
+        ctx.beginPath(); ctx.moveTo(tailX,s.y); ctx.lineTo(s.x,s.y); ctx.stroke();
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // PARTICLE SYSTEM
+    // ══════════════════════════════════════════════
+
+    function generateTextTargets(text) {
+      const { W, H } = state;
+      const off = document.createElement('canvas');
+      const oc = off.getContext('2d');
+      off.width = W; off.height = H;
+
+      // Use Greek epsilon ε as the central symbol
+      const fontSize = Math.min(Math.max(W * 0.22, 90), 280);
+      oc.fillStyle = '#fff';
+      oc.font = `700 ${fontSize}px "Space Mono", monospace`;
+      oc.textAlign = 'center';
+      oc.textBaseline = 'middle';
+      oc.fillText(text, W/2, H/2);
+
+      const data = oc.getImageData(0,0,W,H).data;
+      const positions = [];
+      const step = Math.max(3, Math.round(fontSize/52));
+
+      for (let y = 0; y < H; y += step) {
+        for (let x = 0; x < W; x += step) {
+          if (data[(y*W+x)*4+3] > 128) positions.push({x,y});
+        }
+      }
+      for (let i = positions.length-1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [positions[i],positions[j]] = [positions[j],positions[i]];
+      }
+      const count = Math.floor(CONFIG.particleCount * CONFIG.textParticleRatio);
+      return positions.slice(0, count);
+    }
+
+    function createParticle(idx, target) {
+      const { W, H } = state;
+      return {
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-0.5)*1.8, vy: (Math.random()-0.5)*1.8,
+        target: target || null,
+        size: target ? 1.5 : (Math.random()<0.03 ? 2.0 : 1.0),
+        colorT: target ? Math.random()*0.4+0.1 : Math.random(),
+        idx,
+      };
+    }
+
+    function initParticles() {
+      state.particles = [];
+      for (let i = 0; i < CONFIG.particleCount; i++) {
+        const target = i < state.textTargets.length ? state.textTargets[i] : null;
+        state.particles.push(createParticle(i, target));
+      }
+    }
+
+    function updateGrid() {
+      state.grid = {};
+      for (const p of state.particles) {
+        const key = ((p.x/GRID_SIZE)|0) + ':' + ((p.y/GRID_SIZE)|0);
+        (state.grid[key]||(state.grid[key]=[])).push(p);
+      }
+    }
+
+    function updateParticles(time) {
+      const { W, H, particles, mouse } = state;
+      const t = time * CONFIG.flowSpeed;
+      const r2 = CONFIG.mouseRadius * CONFIG.mouseRadius;
+
+      // doxa phase: particles more chaotic, resist forming text
+      const doxaFactor = state.phase === 'doxa' ? 0.3 : 1.0;
+
+      for (const p of particles) {
+        // Noise flow
+        const nx = noise.noise3D(p.x*CONFIG.flowScale, p.y*CONFIG.flowScale, t);
+        const ny = noise.noise3D(p.x*CONFIG.flowScale+100, p.y*CONFIG.flowScale+100, t);
+        p.vx += nx * CONFIG.particleAccel;
+        p.vy += ny * CONFIG.particleAccel;
+
+        // Text attraction
+        if (p.target) {
+          const dx = p.target.x - p.x;
+          const dy = p.target.y - p.y;
+          p.vx += dx * CONFIG.textAttraction * doxaFactor;
+          p.vy += dy * CONFIG.textAttraction * doxaFactor;
+        }
+
+        // Mouse repulsion
+        if (mouse.active) {
+          const dx = p.x - mouse.sx;
+          const dy = p.y - mouse.sy;
+          const d2 = dx*dx + dy*dy;
+          if (d2 < r2 && d2 > 0.01) {
+            const d = Math.sqrt(d2);
+            const f = (1 - d/CONFIG.mouseRadius) * CONFIG.mouseForce;
+            p.vx += (dx/d)*f;
+            p.vy += (dy/d)*f;
+          }
+        }
+
+        p.vx *= CONFIG.damping;
+        p.vy *= CONFIG.damping;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap
+        if (p.x < -10) p.x = W+10;
+        if (p.x > W+10) p.x = -10;
+        if (p.y < -10) p.y = H+10;
+        if (p.y > H+10) p.y = -10;
+
+        // Drift colorT
+        if (p.target) {
+          p.colorT += (0.25 - p.colorT) * 0.003;
+        }
+      }
+
+      updateGrid();
+    }
+
+    // ══════════════════════════════════════════════
+    // CONNECTIONS
+    // ══════════════════════════════════════════════
+
+    function drawConnections() {
+      const { ctx, particles, grid } = state;
+      let count = 0;
+      const dist2 = CONFIG.connectionDist * CONFIG.connectionDist;
+
+      for (const p of particles) {
+        if (count >= CONFIG.maxConnections) break;
+        const gx = (p.x/GRID_SIZE)|0;
+        const gy = (p.y/GRID_SIZE)|0;
+        for (let dx = -1; dx <= 1; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            const cell = grid[(gx+dx)+':'+(gy+dy)];
+            if (!cell) continue;
+            for (const q of cell) {
+              if (q.idx <= p.idx) continue;
+              const ex = p.x-q.x, ey = p.y-q.y;
+              const d2 = ex*ex+ey*ey;
+              if (d2 < dist2) {
+                const str = 1 - Math.sqrt(d2)/CONFIG.connectionDist;
+                const c = lerpColor((p.colorT+q.colorT)*0.5);
+                ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${str*0.12})`;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(p.x,p.y);
+                ctx.lineTo(q.x,q.y);
+                ctx.stroke();
+                count++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // CURSOR
+    // ══════════════════════════════════════════════
+
+    function drawCursor() {
+      if (state.mouse.sx < 0 || !state.booted || isMobile) return;
+      const { ctx } = state;
+      const x = state.mouse.sx, y = state.mouse.sy;
+      const sz = 12;
+      ctx.strokeStyle = 'rgba(212,168,83,0.4)';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(x-sz,y); ctx.lineTo(x-4,y);
+      ctx.moveTo(x+4,y);  ctx.lineTo(x+sz,y);
+      ctx.moveTo(x,y-sz); ctx.lineTo(x,y-4);
+      ctx.moveTo(x,y+4);  ctx.lineTo(x,y+sz);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(200,184,232,0.75)';
+      ctx.beginPath();
+      ctx.arc(x,y,1.4,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    // ══════════════════════════════════════════════
+    // RENDERER
+    // ══════════════════════════════════════════════
+
+    function render(time) {
+      const { ctx, W, H, particles } = state;
+
+      ctx.fillStyle = `rgba(7,6,10,${CONFIG.trailAlpha})`;
+      ctx.fillRect(0,0,W,H);
+
+      drawStars(time);
+      drawConnections();
+      updateWarpStreaks();
+      drawWarpStreaks();
+
+      for (const p of particles) {
+        const c = lerpColor(p.colorT);
+        const bright = p.target ? 0.82 : 0.60;
+
+        if (p.target) {
+          ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},0.10)`;
+          ctx.fillRect(p.x-3,p.y-3,6,6);
+        }
+
+        const sz = p.size;
+        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${bright})`;
+        ctx.fillRect(p.x-sz/2,p.y-sz/2,sz,sz);
+      }
+
+      drawCursor();
+    }
+
+    // ══════════════════════════════════════════════
+    // BOOT SEQUENCE
+    // ══════════════════════════════════════════════
+
+    function typeText(el, text, charDelay) {
+      return new Promise(resolve => {
+        let i = 0;
+        el.textContent = '';
+        const iv = setInterval(() => {
+          el.textContent += text[i]; i++;
+          if (i >= text.length) { clearInterval(iv); resolve(); }
+        }, charDelay);
+      });
+    }
+
+    async function bootSequence() {
+      const bootEl = document.getElementById('boot-screen');
+      const textEl = document.getElementById('boot-text');
+      const cursorEl = document.getElementById('boot-cursor');
+
+      const lines = [
+        '> episteme.sys v0.1',
+        '> scanning consensus layer...',
+        '> detecting doxa contamination... found',
+        '> filtering opinion from signal...',
+        '> ████████████████████ 100%',
+        '> extracting: knowledge · unveiled · real',
+        '> truth.layer = active',
+      ];
+
+      for (const text of lines) {
+        const line = document.createElement('div');
+        line.className = 'boot-line';
+        textEl.appendChild(line);
+        cursorEl.style.display = 'none';
+        await typeText(line, text, 16);
+        cursorEl.style.display = '';
+        await delay(160);
+      }
+
+      await delay(700);
+      cursorEl.style.display = 'none';
+      bootEl.classList.add('fade-out');
+      await delay(1200);
+      bootEl.style.display = 'none';
+      state.booted = true;
+
+      // Transition: doxa → episteme (particles snap into form)
+      await delay(1000);
+      state.phase = 'episteme';
+    }
+
+    // ══════════════════════════════════════════════
+    // INTERACTION
+    // ══════════════════════════════════════════════
+
+    function reveal(id) {
+      if (state.interaction.revealed.has(id)) return;
+      state.interaction.revealed.add(id);
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('hidden'); el.classList.add('revealed'); }
+    }
+
+    function checkReveals() {
+      const d = state.interaction.mouseDist;
+      if (d > 300) reveal('hud-tl');
+      if (d > 420) { reveal('hud-tr'); reveal('hud-bl'); reveal('hud-br'); }
+      if (d > 600) { reveal('tagline'); reveal('truth-link'); }
+    }
+
+    function triggerDoxa() {
+      // chaos burst
+      for (const p of state.particles) {
+        p.vx += (Math.random()-0.5)*12;
+        p.vy += (Math.random()-0.5)*12;
+      }
+      showMsg('δόξα — mere opinion');
+    }
+
+    function triggerAletheia() {
+      showMsg('ἀλήθεια — truth unveiled');
+      // Golden flash effect
+      const { ctx, W, H } = state;
+      ctx.fillStyle = 'rgba(212,168,83,0.04)';
+      ctx.fillRect(0,0,W,H);
+    }
+
+    let msgActive = false;
+    function showMsg(text) {
+      if (msgActive) return;
+      msgActive = true;
+      const msg = document.createElement('div');
+      msg.className = 'overlay-msg';
+      msg.textContent = text;
+      document.getElementById('overlay').appendChild(msg);
+      requestAnimationFrame(() => msg.classList.add('visible'));
+      setTimeout(() => {
+        msg.classList.remove('visible');
+        setTimeout(() => { msg.remove(); msgActive = false; }, 1800);
+      }, 3200);
+    }
+
+    let hintTimer = null;
+    let hintEl = null;
+
+    function startHintTimer() {
+      hintEl = document.getElementById('hint');
+      hintTimer = setTimeout(() => {
+        hintEl.classList.remove('hidden');
+        hintEl.classList.add('revealed');
+        hintEl.style.animation = 'hintPulse 4s ease-in-out infinite';
+      }, 7000);
+    }
+
+    function hideHint() {
+      if (hintEl && hintEl.classList.contains('revealed')) {
+        hintEl.classList.remove('revealed');
+        hintEl.classList.add('hidden');
+        hintEl.style.animation = '';
+      }
+      clearTimeout(hintTimer);
+    }
+
+    function setupInput() {
+      const { mouse, interaction } = state;
+
+      document.addEventListener('mousemove', (e) => {
+        if (mouse.active) {
+          const dx=e.clientX-mouse.x, dy=e.clientY-mouse.y;
+          interaction.mouseDist += Math.hypot(dx,dy);
+        }
+        interaction.lastMove = Date.now();
+        mouse.x=e.clientX; mouse.y=e.clientY; mouse.active=true;
+        hideHint();
+        checkReveals();
+      });
+
+      document.addEventListener('click', () => { interaction.clicks++; checkReveals(); });
+
+      state.canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const t=e.touches[0];
+        const dx=t.clientX-mouse.x, dy=t.clientY-mouse.y;
+        interaction.mouseDist += Math.hypot(dx,dy);
+        interaction.lastMove=Date.now();
+        mouse.x=t.clientX; mouse.y=t.clientY; mouse.active=true;
+        hideHint(); checkReveals();
+      }, { passive: false });
+
+      state.canvas.addEventListener('touchstart', (e) => {
+        const t=e.touches[0];
+        mouse.x=t.clientX; mouse.y=t.clientY; mouse.active=true;
+        interaction.clicks++; checkReveals();
+      });
+
+      state.canvas.addEventListener('touchend', () => {
+        mouse.x=-9999; mouse.y=-9999; mouse.sx=-9999; mouse.sy=-9999;
+      });
+
+      document.addEventListener('keydown', (e) => {
+        interaction.keyBuf += e.key;
+        if (interaction.keyBuf.length > 24) {
+          interaction.keyBuf = interaction.keyBuf.slice(-24);
+        }
+        if (interaction.keyBuf.includes('doxa')) {
+          interaction.keyBuf = '';
+          triggerDoxa();
+        }
+        if (interaction.keyBuf.includes('aletheia')) {
+          interaction.keyBuf = '';
+          triggerAletheia();
+        }
+        if (interaction.keyBuf.includes('episteme')) {
+          interaction.keyBuf = '';
+          showMsg('ἐπιστήμη — true knowledge');
+        }
+      });
+    }
+
+    // ══════════════════════════════════════════════
+    // CANVAS SETUP & RESIZE
+    // ══════════════════════════════════════════════
+
+    function setupCanvas() {
+      state.canvas = document.getElementById('canvas');
+      state.ctx = state.canvas.getContext('2d');
+      state.dpr = window.devicePixelRatio || 1;
+      state.W = window.innerWidth;
+      state.H = window.innerHeight;
+      state.canvas.width = state.W * state.dpr;
+      state.canvas.height = state.H * state.dpr;
+      state.canvas.style.width = state.W + 'px';
+      state.canvas.style.height = state.H + 'px';
+      state.ctx.scale(state.dpr, state.dpr);
+    }
+
+    let resizeTimer;
+    function handleResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        state.W = window.innerWidth;
+        state.H = window.innerHeight;
+        state.dpr = window.devicePixelRatio || 1;
+        state.canvas.width = state.W * state.dpr;
+        state.canvas.height = state.H * state.dpr;
+        state.canvas.style.width = state.W + 'px';
+        state.canvas.style.height = state.H + 'px';
+        state.ctx.setTransform(1,0,0,1,0,0);
+        state.ctx.scale(state.dpr, state.dpr);
+        state.textTargets = generateTextTargets('ε');
+        for (let i = 0; i < state.particles.length; i++) {
+          state.particles[i].target = i < state.textTargets.length ? state.textTargets[i] : null;
+        }
+      }, 250);
+    }
+
+    // ══════════════════════════════════════════════
+    // MAIN LOOP & INIT
+    // ══════════════════════════════════════════════
+
+    function animate(time) {
+      const { mouse } = state;
+      mouse.sx += (mouse.x - mouse.sx) * 0.12;
+      mouse.sy += (mouse.y - mouse.sy) * 0.12;
+      updateParticles(time);
+      render(time);
+      requestAnimationFrame(animate);
+    }
+
+    async function init() {
+      setupCanvas();
+      await document.fonts.ready;
+      state.textTargets = generateTextTargets('ε');
+      initStars();
+      initParticles();
+      setupInput();
+      window.addEventListener('resize', handleResize);
+
+      state.ctx.fillStyle = '#07060A';
+      state.ctx.fillRect(0,0,state.W,state.H);
+
+      requestAnimationFrame(animate);
+      await bootSequence();
+      startHintTimer();
+    }
+
+    init();
+
+  })();
+  </script>
+
+</body>
+</html>
