@@ -116,6 +116,23 @@ export function drawStars(time) {
     const sz = s.size;
     ctx.fillStyle=`rgba(${s.r},${s.g},${s.b},${Math.min(alpha,0.92)})`;
     ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
+
+    // Star name + coordinates — always visible below star
+    if (s.starName) {
+      const la = s.hovered ? 0.90 : 0.50;
+      ctx.textAlign = 'center';
+
+      // Name — serif italic
+      ctx.font = `italic 12px 'Cormorant Garamond', Georgia, serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = `rgba(240,210,140,${la})`;
+      ctx.fillText(s.starName, px, py + 12);
+
+      // Coordinates — tiny mono
+      ctx.font = `7px 'Space Mono', monospace`;
+      ctx.fillStyle = `rgba(200,184,232,${la * 0.65})`;
+      ctx.fillText(s.starCoords, px, py + 26);
+    }
   }
 }
 

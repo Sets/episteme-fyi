@@ -36,7 +36,7 @@ export const CONSTELLATIONS = [
     id: 'alternet',
     title: 'ALTERNET',
     nodes: [
-      { label: ['ideas are nothing.', 'execution — everything.'], angle: 0,   dist: 0.18, hero: true },
+      { label: ['ideas are nothing.', 'target · strategy · plan', 'execution — everything.'], angle: 0,   dist: 0.22, hero: true },
       { label: ['consensus kills', 'real inquiry'],               angle: 48,  dist: 0.26 },
       { label: ['first reply wins —', 'not debate'],              angle: 96,  dist: 0.22 },
       { label: ["aligned AI", "can't go there"],                 angle: 144, dist: 0.25 },
@@ -67,8 +67,8 @@ export const CONSTELLATIONS = [
 // ═══ BOX DIMENSIONS ═══
 const BOX_W      = 108;
 const BOX_H      = 38;
-const HERO_BOX_W = 240;
-const HERO_BOX_H = 58;
+const HERO_BOX_W = 260;
+const HERO_BOX_H = 66;
 const MARGIN     = 14;
 const BORDER_R   = 4;
 
