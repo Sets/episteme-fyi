@@ -50,6 +50,21 @@ export const CONSTELLATIONS = [
     ],
   },
   {
+    id: 'infra',
+    title: 'DISRUPTIVE INFRASTRUCTURE',
+    subtitle: 'intelligence-grade nomadic compute',
+    nodes: [
+      { label: ['if they can find it,', 'they can kill it.', 'nomadic compute — survive.'], angle: 0,   dist: 0.22, hero: true },
+      { label: ['the cloud is', "someone else's cage"],  angle: 45,  dist: 0.26 },
+      { label: ['public IPs are', 'painted targets'],     angle: 90,  dist: 0.22 },
+      { label: ['user-space lies,', 'kernel dictates'],   angle: 135, dist: 0.25 },
+      { label: ['compliance badges', 'hide the breaches'], angle: 180, dist: 0.22 },
+      { label: ['static datacenters,', 'sitting ducks'],  angle: 225, dist: 0.26 },
+      { label: ['standard protocols,', 'standard exploits'], angle: 270, dist: 0.22 },
+      { label: ['assume breach.', 'cage the threat.'],    angle: 315, dist: 0.24 },
+    ],
+  },
+  {
     id: 'manifesto',
     title: 'EPISTEME',
     manifesto: true,

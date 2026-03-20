@@ -13,22 +13,29 @@ export const stars = [];
 const INTERACTIVE = [
   {
     constellationId: 'daas',
-    relX: 0.28, relY: 0.20,      // top-left-center
+    relX: 0.28, relY: 0.22,      // top-left
     starName: 'Sirius',
     starCoords: 'α CMa · −16.716°',
   },
   {
     constellationId: 'ecommerce',
-    relX: 0.72, relY: 0.20,      // top-right-center
+    relX: 0.72, relY: 0.22,      // top-right
     starName: 'Algol',
     starCoords: 'β Per · +40.956°',
   },
   {
     constellationId: 'alternet',
-    relX: 0.50, relY: 0.80,      // bottom-center
+    relX: 0.72, relY: 0.76,      // bottom-right (below Algol)
     starName: 'Antares',
     starCoords: 'α Sco · −26.432°',
     starSubtitle: 'agentic communications',
+  },
+  {
+    constellationId: 'infra',
+    relX: 0.28, relY: 0.76,      // bottom-left (below Sirius)
+    starName: 'Alcor',
+    starCoords: '80 UMa · +54.988°',
+    starSubtitle: 'intelligence-grade nomadic compute',
   },
 ];
 
